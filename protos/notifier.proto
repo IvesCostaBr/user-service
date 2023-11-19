@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "./pb";
+
+package notifier;
+
+service NotifierStream {
+  rpc Heathcheck (HeathCheck) returns (HeathCheck);
+  rpc Send (stream SendEvent) returns (Response);
+}
+
+message SendEvent {
+  string channel = 1;
+  string payload = 2;
+}
+
+message Response {
+  string id = 1;
+  bool sended = 2;
+}
+
+message DataReceiver {
+  string data = 1;
+  bool isSuccess = 2;
+}
+
+message HeathCheck {
+  string status = 1;
+  string version = 2;
+}

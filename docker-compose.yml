@@ -1,0 +1,59 @@
+networks:
+  internal-net:
+    external: true
+    driver: bridge
+
+services:
+  # api:
+  #   image: api:latest
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #   container_name: uoleti-api
+  #   restart: always
+  #   ports:
+  #     - 8000:8000
+  #   env_file:
+  #     - ./.env
+  #   networks:
+  #     - internal-net
+
+  mongodb:
+    image: mongo:5.0.22
+    restart: always
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - internal-net
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: unless-stopped
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on: [mongodb]
+    networks:
+      - internal-net
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: "redis-server --save 20 1 --requirepass cpktnwt00123 --loglevel warning"
+    volumes:
+      - cache:/data
+    networks:
+      - internal-net
+
+volumes:
+  cache:
+    driver: local
+  mongodb:
