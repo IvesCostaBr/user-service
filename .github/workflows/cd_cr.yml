@@ -3,13 +3,6 @@ name: Pipeline CD AUTH_API - Cloud Run
 on:
   workflow_dispatch:
     inputs:
-      tenant:
-        type: choice
-        description: Aplicação
-        options:
-          - uoleti
-          - project-x
-        required: true
       environment:
         type: choice
         description: Ambiente de deploy
@@ -96,7 +89,7 @@ jobs:
           export CREDENTIAL='${{ secrets.GOOGLE_CREDENTIALS }}'
           echo $CREDENTIAL > ./src/configs/credential-gcp.json
           ls -la ./src/configs
-          sudo docker build -t ${{ env.IMAGE_PATH }} . --build-arg PROJECT_ID="${{ env.PROJECT_ID }}" --build-arg DEPLOY="1" --build-arg PROJECT_ENVIRON="${{github.event.inputs.tenant}}-${{github.event.inputs.environment}}"
+          sudo docker build -t ${{ env.IMAGE_PATH }} . --build-arg PROJECT_ID="${{ env.PROJECT_ID }}" --build-arg DEPLOY="1" --build-arg PROJECT_ENVIRON="auth-${{github.event.inputs.environment}}"
           docker push ${{ env.IMAGE_PATH }}
 
   deploy:
