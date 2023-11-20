@@ -111,7 +111,7 @@ jobs:
       - id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v1"
         with:
-          service: "api-${{github.event.inputs.tenant}}-${{github.event.inputs.environment}}"
+          service: "api-auth-${{github.event.inputs.environment}}"
           image: "${{ env.IMAGE_PATH }}"
 
       - name: "Use output"
