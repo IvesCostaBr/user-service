@@ -1,7 +1,6 @@
 from src.infra.db.abstract_conneection import AbstractConnection
 from src.infra.db import database
 
-
 class ProviderRepository:
     def __init__(self) -> None:
         self.db: AbstractConnection = database

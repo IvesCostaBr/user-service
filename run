@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Stating Application!"
+
+if [ "$1" == 'debug' ];then
+    docker build -f ./Dockerfile --build-arg PROJECT_ID="uoleti-staging" --build-arg DEPLOY="1" --build-arg PROJECT_ENVIRON="auth-staging" -t teste/teste:latest .
+    docker run -it -v ${PWD}:/code/ -p 8000:8000 -p 5678:5678 teste/teste:latest
+    exit 1
+fi
+
+# sudo docker-compose -f docker-compose.yml build --no-cache && sudo docker-compose -f docker-compose.yml up

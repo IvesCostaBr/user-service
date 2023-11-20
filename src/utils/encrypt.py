@@ -30,9 +30,10 @@ def verify_key(input_key, stored_key):
 
 def generate_tokens(user_data: dict):
     # Configuração do token de acesso
+    total_seconds = ((datetime.utcnow() + timedelta(minutes=15)) - datetime.now()).total_seconds()
     access_token_payload = {
         "sub": str(user_data.get("_id")),
-        "exp": datetime.utcnow() + timedelta(minutes=15),  # Expira em 15 minutos
+        "exp": datetime.utcnow() + timedelta(minutes=15),
         "iat": datetime.utcnow(),
         "nbf": datetime.utcnow(),
     }
@@ -48,7 +49,7 @@ def generate_tokens(user_data: dict):
 
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm="HS256")
 
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": int(total_seconds)}
 
 
 def validate_access_token(access_token):
@@ -67,12 +68,10 @@ def validate_access_token(access_token):
 
 def validate_refresh_token(refresh_token):
     try:
-        # Decodifica o refresh token
         decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
-
-        # Verifica se o token ainda é válido
+        total_seconds = ((datetime.utcnow() + timedelta(minutes=15)) - datetime.now()).total_seconds()
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
-            # Gera um novo token de acesso
+            new_access_token
             new_access_token = jwt.encode(
                 {
                     "sub": decoded_token["sub"],
@@ -81,18 +80,9 @@ def validate_refresh_token(refresh_token):
                 SECRET_KEY,
                 algorithm="HS256",
             )
-            refresh_token_payload = {
-                "sub": decoded_token["sub"],
-                "exp": datetime.utcnow() + timedelta(days=7),
-                "iat": datetime.utcnow(),
-                "nbf": datetime.utcnow(),
-            }
 
-            refresh_token = jwt.encode(
-                refresh_token_payload, SECRET_KEY, algorithm="HS256"
-            )
 
-            return {"access_toekn": new_access_token, "refresh_token": refresh_token}
+            return {"access_token": new_access_token, "expires_in": total_seconds}
     except jwt.ExpiredSignatureError:
         # O refresh token expirou
         return None

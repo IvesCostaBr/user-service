@@ -2,4 +2,5 @@
 /venv/
 import_data/
 import_data.py
-/src/configs/credentials-gcp.json
+/src/configs/credential-gcp.json
+*.pyc

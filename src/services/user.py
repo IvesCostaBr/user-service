@@ -31,17 +31,6 @@ class UserService:
     def get(self, id):
         return None
 
-    def me(self, token: str):
-        """Get data user."""
-        result, data = validate_access_token(token)
-        if not result:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={"message": "user not authenticated"},
-            )
-        user_data = user_repo.get(data.get("sub"))
-        return user_data
-
     def login(self, data: user.LoginUser):
         """Login and generete token of user."""
         if not data.passwordless:
@@ -49,7 +38,7 @@ class UserService:
             if not len(user_exists):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"error": "User already exists."},
+                    detail={"error": "unauthorized"},
                 )
             user = user_exists[0]
             data.password = encrypt_key(data.password)

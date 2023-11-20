@@ -1,5 +1,12 @@
 from pydantic import BaseModel, root_validator
 
+class OutUser(BaseModel):
+    
+    id: str
+    email: str = None
+    phone: str = None
+    created_at: int = None
+    modified_at: int = None
 
 class InUser(BaseModel):
     """Model of register user."""
