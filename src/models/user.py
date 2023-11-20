@@ -1,4 +1,5 @@
 from pydantic import BaseModel, root_validator
+from typing import List
 
 class OutUser(BaseModel):
     
@@ -7,6 +8,7 @@ class OutUser(BaseModel):
     phone: str = None
     created_at: int = None
     modified_at: int = None
+    consumers: List[str] = []
 
 class InUser(BaseModel):
     """Model of register user."""
