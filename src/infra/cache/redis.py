@@ -1,6 +1,7 @@
 from src.infra.cache.interfaces.icache_client import ICacheCliente
 import redis, os
 
+
 class RedisClient(ICacheCliente):
     def __init__(self):
         try:

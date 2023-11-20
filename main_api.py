@@ -1,10 +1,16 @@
 from dotenv import load_dotenv
 from src.routes import user
-import os, logging
+import os
+# load env vars from secret manager
+if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
+    from src.utils.secrets import start_secret_env
 
+    if os.path.exists("./src/configs/credential-gcp.json"):
+        start_secret_env()
+    else:
+        raise Exception("Error to load env config.")
 load_dotenv()
 
-from src.utils import *
 from fastapi import FastAPI, Request, responses, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -35,7 +41,7 @@ def custom_openapi():
     openapi_schema = get_openapi(
         title="API Auth",
         version="1.0.0",
-        description=f"Tenant -> {os.environ.get('PROJECT')} API",
+        description=f"AUTH API",
         routes=app.routes,
         servers=[
             {"url": "http://localhost:8000", "description": "Local environment"},
@@ -66,6 +72,7 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
+
 @app.exception_handler(HTTPException)
 async def exception_handler(request: Request, exc: HTTPException):
     """Exception generic handler."""
@@ -73,6 +80,7 @@ async def exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"message": exc.detail},
     )
+
 
 @app.get("/heath-check")
 def heath_check():

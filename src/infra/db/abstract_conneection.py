@@ -25,7 +25,7 @@ class AbstractConnection(ABC):
     @abstractmethod
     def exists(self, entity: str, query: dict):
         raise NotImplementedError()
-    
+
     @abstractmethod
     def filter_query(self, entity: str, query: dict):
         raise NotImplementedError()

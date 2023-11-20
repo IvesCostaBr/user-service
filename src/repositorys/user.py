@@ -1,6 +1,5 @@
 from src.infra.db.abstract_conneection import AbstractConnection
 from src.infra.db import database
-from src.models import user
 
 
 class ProviderRepository:
@@ -8,9 +7,9 @@ class ProviderRepository:
         self.db: AbstractConnection = database
         self.entity = "users"
 
-    def create(self, data: user.InUser):
+    def create(self, data: dict):
         """Create a new provider"""
-        result = self.db.create(self.entity, data.model_dump())
+        result = self.db.create(self.entity, data)
         return result
 
     def get(self, id: str):

@@ -1,0 +1,27 @@
+[MASTER]
+
+# Define o estilo de identação para espaços
+indent-string = '    '
+
+[MESSAGES CONTROL]
+
+# Desativa a verificação de identação
+disable=bad-continuation
+
+[BASIC]
+
+# Define o estilo de indentação para espaços
+indent-string = '    '
+
+[FORMAT]
+
+# Define a quantidade de espaços por nível de indentação
+indent-size = 4
+
+# Configura para converter tabs para espaços
+indent-tabs = False
+
+[TYPECHECK]
+
+# Desativa verificação de indentação para verificação de tipo
+disable=bad-continuation

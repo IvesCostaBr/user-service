@@ -15,17 +15,31 @@ class MongoConnection(AbstractConnection):
 
     def create_connection(self):
         """Create connection with MongoDB."""
-        self.client = MongoClient(host=self.host, port=self.port)
+        self.client = MongoClient(self.host, self.port)
+        print("MongoDB connected successfully!!")
         self.db = self.client[self.db_name]
 
     def get(self, entity: str, id: str, use_cache: bool = True):
-        return super().get(entity, id, use_cache)
+        if (doc := self.db[entity].find_one({"_id": id})) is not None:
+            return doc
+        else:
+            return None
 
-    def get_all(self, entity: str):
-        return super().get_all(entity)
+    def get_all(self, entity: str, limit: int = 100):
+        docs = list(self.db["books"].find(limit))
+        return docs
 
     def create(self, entity: str, data: dict):
-        return super().create(entity, data)
+        new_data = self.db[entity].insert_one(data)
+        return str(new_data.inserted_id)
 
     def update(self, entity: str, id: str, data: dict):
-        return super().update(entity, id, data)
+        return
+
+    def filter_query(self, entity: str, query: dict):
+        result = self.db[entity].find(query)
+        return list(result)
+
+    def exists(self, entity: str, query: dict):
+        result = self.db[entity].find(query)
+        return list(result)

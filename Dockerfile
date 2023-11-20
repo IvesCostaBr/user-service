@@ -1,4 +1,5 @@
-FROM python:3.13.0a1-slim-bullseye
+# 
+FROM python:3.9.18-bullseye
 
 ARG PROJECT_ENVIRON
 ARG PROJECT_ID
@@ -25,4 +26,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "main.py"]
+CMD ["uvicorn", "main_api:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
