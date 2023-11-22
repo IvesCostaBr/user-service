@@ -1,4 +1,4 @@
-import grpc, threading, time, logging
+import grpc, threading, time, logging, os
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,10 @@ class GrpcClient:
 
     def __start__connection(self):
         try:
-            self.channel = grpc.insecure_channel(self.host)
+            if os.environ.get("ENVIRONMENT") != "DEV":
+                self.channel = grpc.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
+            else:
+                self.channel = grpc.insecure_channel(self.host)
             self.stub = self.stuClass(self.channel)
             print("starting connection grpc!")
             self.is_connected = True
