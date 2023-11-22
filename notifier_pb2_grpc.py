@@ -5,7 +5,7 @@ import grpc
 import notifier_pb2 as notifier__pb2
 
 
-class NotifierStreamStub(object):
+class NotifierStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,111 +14,86 @@ class NotifierStreamStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Heathcheck = channel.unary_unary(
-            "/notifier.NotifierStream/Heathcheck",
-            request_serializer=notifier__pb2.HeathCheck.SerializeToString,
-            response_deserializer=notifier__pb2.HeathCheck.FromString,
-        )
-        self.Send = channel.stream_unary(
-            "/notifier.NotifierStream/Send",
-            request_serializer=notifier__pb2.SendEvent.SerializeToString,
-            response_deserializer=notifier__pb2.Response.FromString,
-        )
+        self.Heathcheck = channel.stream_stream(
+                '/notifier.Notifier/Heathcheck',
+                request_serializer=notifier__pb2.SendHelthCheck.SerializeToString,
+                response_deserializer=notifier__pb2.HeathCheck.FromString,
+                )
+        self.Send = channel.unary_unary(
+                '/notifier.Notifier/Send',
+                request_serializer=notifier__pb2.SendEvent.SerializeToString,
+                response_deserializer=notifier__pb2.Response.FromString,
+                )
 
 
-class NotifierStreamServicer(object):
+class NotifierServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Heathcheck(self, request, context):
+    def Heathcheck(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
-    def Send(self, request_iterator, context):
+    def Send(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
-def add_NotifierStreamServicer_to_server(servicer, server):
+def add_NotifierServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "Heathcheck": grpc.unary_unary_rpc_method_handler(
-            servicer.Heathcheck,
-            request_deserializer=notifier__pb2.HeathCheck.FromString,
-            response_serializer=notifier__pb2.HeathCheck.SerializeToString,
-        ),
-        "Send": grpc.stream_unary_rpc_method_handler(
-            servicer.Send,
-            request_deserializer=notifier__pb2.SendEvent.FromString,
-            response_serializer=notifier__pb2.Response.SerializeToString,
-        ),
+            'Heathcheck': grpc.stream_stream_rpc_method_handler(
+                    servicer.Heathcheck,
+                    request_deserializer=notifier__pb2.SendHelthCheck.FromString,
+                    response_serializer=notifier__pb2.HeathCheck.SerializeToString,
+            ),
+            'Send': grpc.unary_unary_rpc_method_handler(
+                    servicer.Send,
+                    request_deserializer=notifier__pb2.SendEvent.FromString,
+                    response_serializer=notifier__pb2.Response.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "notifier.NotifierStream", rpc_method_handlers
-    )
+            'notifier.Notifier', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-# This class is part of an EXPERIMENTAL API.
-class NotifierStream(object):
+ # This class is part of an EXPERIMENTAL API.
+class Notifier(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Heathcheck(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def Heathcheck(request_iterator,
             target,
-            "/notifier.NotifierStream/Heathcheck",
-            notifier__pb2.HeathCheck.SerializeToString,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(request_iterator, target, '/notifier.Notifier/Heathcheck',
+            notifier__pb2.SendHelthCheck.SerializeToString,
             notifier__pb2.HeathCheck.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Send(
-        request_iterator,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.stream_unary(
-            request_iterator,
+    def Send(request,
             target,
-            "/notifier.NotifierStream/Send",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/notifier.Notifier/Send',
             notifier__pb2.SendEvent.SerializeToString,
             notifier__pb2.Response.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

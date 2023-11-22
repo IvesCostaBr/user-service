@@ -5,22 +5,24 @@ from typing import ClassVar as _ClassVar, Optional as _Optional
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class SendEvent(_message.Message):
-    __slots__ = ["channel", "payload"]
+    __slots__ = ["consumer", "template_type", "channel", "payload"]
+    CONSUMER_FIELD_NUMBER: _ClassVar[int]
+    TEMPLATE_TYPE_FIELD_NUMBER: _ClassVar[int]
     CHANNEL_FIELD_NUMBER: _ClassVar[int]
     PAYLOAD_FIELD_NUMBER: _ClassVar[int]
+    consumer: str
+    template_type: str
     channel: str
     payload: str
-    def __init__(
-        self, channel: _Optional[str] = ..., payload: _Optional[str] = ...
-    ) -> None: ...
+    def __init__(self, consumer: _Optional[str] = ..., template_type: _Optional[str] = ..., channel: _Optional[str] = ..., payload: _Optional[str] = ...) -> None: ...
 
 class Response(_message.Message):
-    __slots__ = ["id", "sended"]
-    ID_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ["sended", "message"]
     SENDED_FIELD_NUMBER: _ClassVar[int]
-    id: str
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
     sended: bool
-    def __init__(self, id: _Optional[str] = ..., sended: bool = ...) -> None: ...
+    message: str
+    def __init__(self, sended: bool = ..., message: _Optional[str] = ...) -> None: ...
 
 class DataReceiver(_message.Message):
     __slots__ = ["data", "isSuccess"]
@@ -31,11 +33,21 @@ class DataReceiver(_message.Message):
     def __init__(self, data: _Optional[str] = ..., isSuccess: bool = ...) -> None: ...
 
 class HeathCheck(_message.Message):
-    __slots__ = ["status", "version"]
+    __slots__ = ["status", "version", "service_name", "datetime"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
+    SERVICE_NAME_FIELD_NUMBER: _ClassVar[int]
+    DATETIME_FIELD_NUMBER: _ClassVar[int]
     status: str
     version: str
-    def __init__(
-        self, status: _Optional[str] = ..., version: _Optional[str] = ...
-    ) -> None: ...
+    service_name: str
+    datetime: str
+    def __init__(self, status: _Optional[str] = ..., version: _Optional[str] = ..., service_name: _Optional[str] = ..., datetime: _Optional[str] = ...) -> None: ...
+
+class SendHelthCheck(_message.Message):
+    __slots__ = ["ping", "service"]
+    PING_FIELD_NUMBER: _ClassVar[int]
+    SERVICE_FIELD_NUMBER: _ClassVar[int]
+    ping: str
+    service: str
+    def __init__(self, ping: _Optional[str] = ..., service: _Optional[str] = ...) -> None: ...

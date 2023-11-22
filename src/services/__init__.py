@@ -1,6 +1,7 @@
 import importlib, os
 import inspect
 
+
 modules_loaded = []
 
 module_dir = "src/services"
@@ -21,3 +22,4 @@ for module_name in module_files:
             instance = class_obj()
             globals()[f"{instance.entity}_service"] = instance
             modules_loaded.append(f"{instance.entity}_service")
+

@@ -1,8 +1,10 @@
 from dotenv import load_dotenv
 import os
+
 # load env vars from secret manager
 if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
     from src.utils.secrets import start_secret_env
+
     if os.path.exists("./src/configs/credential-gcp.json"):
         start_secret_env()
     else:

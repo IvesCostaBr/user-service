@@ -31,7 +31,7 @@ class MongoConnection(AbstractConnection):
             return None
 
     def get_all(self, entity: str, limit: int = 100):
-        docs = list(self.db["books"].find(limit))
+        docs = list(self.db[entity].find(limit))
         return docs
 
     def create(self, entity: str, data: dict):
@@ -41,11 +41,11 @@ class MongoConnection(AbstractConnection):
 
     def update(self, entity: str, id: str, data: dict):
         data["updated_at"] = time.mktime(datetime.now().timetuple())
-        update_operation = {
-            "$set": data
-        }
+        update_operation = {"$set": data}
         try:
-            self.db[entity].update_one({"_id": ObjectId(id)}, update_operation, upsert=False)
+            self.db[entity].update_one(
+                {"_id": ObjectId(id)}, update_operation, upsert=False
+            )
             return True
         except:
             return False

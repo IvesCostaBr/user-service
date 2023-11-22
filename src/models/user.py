@@ -1,14 +1,30 @@
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, validator
+from src.utils.validators import validate_email, validate_phone
 from typing import List
 
+
 class OutUser(BaseModel):
-    
     id: str
     email: str = None
     phone: str = None
     created_at: int = None
     modified_at: int = None
     consumers: List[str] = []
+
+    @validator("email")
+    def validate_email_value(cls, value):
+        """validate email."""
+        if not validate_email(value):
+            raise ValueError("Invalid email.")
+        return value
+
+    @validator("phone")
+    def validate_phone_value(cls, value):
+        """Validate phone."""
+        if not validate_phone(value):
+            raise ValueError("Invalid phone.")
+        return value
+
 
 class InUser(BaseModel):
     """Model of register user."""

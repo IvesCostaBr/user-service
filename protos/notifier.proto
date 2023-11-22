@@ -4,19 +4,21 @@ option go_package = "./pb";
 
 package notifier;
 
-service NotifierStream {
-  rpc Heathcheck (HeathCheck) returns (HeathCheck);
-  rpc Send (stream SendEvent) returns (Response);
+service Notifier {
+  rpc Heathcheck (stream SendHelthCheck) returns (stream HeathCheck);
+  rpc Send (SendEvent) returns (Response);
 }
 
 message SendEvent {
-  string channel = 1;
-  string payload = 2;
+  string consumer = 1;
+  string template_type = 2;
+  string channel = 3;
+  string payload = 4;
 }
 
 message Response {
-  string id = 1;
-  bool sended = 2;
+  bool sended = 1;
+  string message = 2;
 }
 
 message DataReceiver {
@@ -27,4 +29,11 @@ message DataReceiver {
 message HeathCheck {
   string status = 1;
   string version = 2;
+  string service_name = 3;
+  string datetime = 4;
+}
+
+message SendHelthCheck {
+  string ping = 1;
+  string service = 2;
 }

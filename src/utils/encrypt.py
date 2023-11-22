@@ -2,10 +2,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import datetime, timedelta
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-import base64, os, jwt
-
+import base64, os, jwt, pyotp
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
+totp = pyotp.TOTP("base32secret3232", interval=900)
 
 
 def encrypt_key(key):
@@ -30,7 +30,9 @@ def verify_key(input_key, stored_key):
 
 def generate_tokens(user_data: dict):
     # Configuração do token de acesso
-    total_seconds = ((datetime.utcnow() + timedelta(minutes=15)) - datetime.now()).total_seconds()
+    total_seconds = (
+        (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
+    ).total_seconds()
     access_token_payload = {
         "sub": str(user_data.get("_id")),
         "exp": datetime.utcnow() + timedelta(minutes=15),
@@ -49,7 +51,11 @@ def generate_tokens(user_data: dict):
 
     refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm="HS256")
 
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": int(total_seconds)}
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "expires_in": int(total_seconds),
+    }
 
 
 def validate_access_token(access_token):
@@ -69,7 +75,9 @@ def validate_access_token(access_token):
 def validate_refresh_token(refresh_token):
     try:
         decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
-        total_seconds = ((datetime.utcnow() + timedelta(minutes=15)) - datetime.now()).total_seconds()
+        total_seconds = (
+            (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
+        ).total_seconds()
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
             new_access_token
             new_access_token = jwt.encode(
@@ -81,7 +89,6 @@ def validate_refresh_token(refresh_token):
                 algorithm="HS256",
             )
 
-
             return {"access_token": new_access_token, "expires_in": total_seconds}
     except jwt.ExpiredSignatureError:
         # O refresh token expirou
@@ -90,3 +97,13 @@ def validate_refresh_token(refresh_token):
     except jwt.InvalidTokenError:
         # Token inválido
         return None
+
+
+def generate_otp():
+    return totp.now()
+
+
+def verify_otp(otp: str):
+    """Verify otp code."""
+    is_valid = totp.verify(otp)
+    return is_valid

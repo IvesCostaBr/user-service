@@ -1,4 +1,4 @@
-from src.repositorys import user_repo
+from src.repositorys import user_repo, login_repo
 from src.models import user
 from starlette import status
 from fastapi import HTTPException
@@ -6,8 +6,12 @@ from src.utils.encrypt import (
     encrypt_key,
     generate_tokens,
     validate_refresh_token,
-    validate_access_token,
+    generate_otp,
+    verify_otp,
 )
+from datetime import datetime
+from src.utils import notifier_grpc_client
+import json
 
 
 class UserService:
@@ -52,6 +56,89 @@ class UserService:
         else:
             user_exists = user_repo.filter_query(phone=data.phone)
             return {"detail": "autehntication code sent to phone."}
+
+    def __verify_request_login_in_open(self, phone: str):
+        """Verify exists login otp in open."""
+        login_code = login_repo.filter_query(phone=phone, is_validated=False)
+        if login_code:
+            not_used = False
+            for each in login_code:
+                last_login = datetime.utcfromtimestamp(each.get("created_at"))
+                date_now = datetime.now()
+                diff_minutes = (date_now - last_login).total_seconds() / 60
+                if diff_minutes >= 5:
+                    login_repo.update(each.get("_id"), {"is_validated": True})
+                else:
+                    not_used = True
+            if not_used:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={"error": "already exists code."},
+                )
+
+    def login_passwordless(self, data: user.LoginUser):
+        """Send login code with phone or email."""
+        self.__verify_request_login_in_open(data.phone)
+        if not data.phone:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "phone is required."},
+            )
+        user = user_repo.filter_query(phone=data.phone)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "error login user."},
+            )
+        user = user[0]
+        payload = {
+            "email": user.get("email"),
+            "phone": user.get("phone"),
+            "is_validated": False,
+            "code": generate_otp(),
+            "created_at": datetime.now(),
+        }
+
+        send_result = notifier_grpc_client.call(
+            "Send",
+            "SendEvent",
+            {
+                "consumer": user.get("consumers")[0],
+                "template_type": "login",
+                "channel": "sms",
+                "payload": json.dumps(
+                    {
+                        "otp_value": payload.get("code"),
+                        "to_number": user.get("phone"),
+                    }
+                )
+            }
+        )
+        if not send_result:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "error send code.please try again."},
+            )
+        login_repo.create(payload)
+        return {"detail": "autehntication code sent to phone."}
+
+    def verify_login_code(self, otp: str):
+        """Verify login code."""
+        login_code = login_repo.filter_query(code=otp, is_validated=False)
+        if not login_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "code not valid."},
+            )
+        login_code = login_code[0]
+        if verify_otp(login_code.get("code")):
+            login_repo.update(login_code.get("_id"), {"is_validated": True})
+            return generate_tokens(login_code)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "invalid code or expired."},
+            )
 
     def refresh_token(self, token: str):
         """Refresh token."""

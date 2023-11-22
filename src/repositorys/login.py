@@ -2,10 +2,10 @@ from src.infra.db.abstract_conneection import AbstractConnection
 from src.infra.db import database
 
 
-class ProviderRepository:
+class LoginRepository:
     def __init__(self) -> None:
         self.db: AbstractConnection = database
-        self.entity = "users"
+        self.entity = "login"
 
     def create(self, data: dict):
         """Create a new provider"""
@@ -30,4 +30,9 @@ class ProviderRepository:
     def exists(self, **kwargs):
         """verify exists document."""
         result = self.db.exists(self.entity, kwargs)
+        return result
+
+    def update(self, id: str, kwargs):
+        """update document."""
+        result = self.db.update(self.entity, id, kwargs)
         return result

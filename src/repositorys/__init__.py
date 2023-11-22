@@ -16,5 +16,9 @@ for module_name in module_files:
     for class_name, class_obj in classes:
         if class_name.endswith("Repository"):
             instance = class_obj()
-            globals()[f"{instance.entity[:-1]}_repo"] = instance
-            modules_loaded.append(f"{instance.entity[:-1]}_repo")
+            if instance.entity.endswith("s"):
+                globals()[f"{instance.entity[:-1]}_repo"] = instance
+                modules_loaded.append(f"{instance.entity[:-1]}_repo")
+                continue
+            globals()[f"{instance.entity}_repo"] = instance
+            modules_loaded.append(f"{instance.entity}_repo")
