@@ -1,9 +1,11 @@
 import re
 
 
-def validate_phone(phone):
-    padrao = r"^\+\d{2}\d{10}$"
-    return bool(re.match(padrao, phone))
+def validate_phone_number(phone_number):
+    regex_pattern = r'^\+\d+$'
+    match = re.match(regex_pattern, phone_number)
+    return bool(match)
+
 
 
 def validate_email(email):

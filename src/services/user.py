@@ -19,12 +19,7 @@ class UserService:
         self.entity = "user"
 
     def create(self, data: user.InUser):
-        user_exists = user_repo.filter_query(email=data.email, phone=data.phone)
-        if len(user_exists):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": "User already exists."},
-            )
+        """Create user."""
         data.password = encrypt_key(data.password)
         doc_id = user_repo.create(data.model_dump())
         return {"detail": doc_id}
@@ -34,6 +29,13 @@ class UserService:
 
     def get(self, id):
         return None
+    
+    def forget_password(self, email: str):
+        """Send email to reset password."""
+        return True
+    
+    def recovery_password(self, email: str, code: str):
+        return True
 
     def login(self, data: user.LoginUser):
         """Login and generete token of user."""

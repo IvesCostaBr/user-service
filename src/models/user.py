@@ -1,5 +1,6 @@
 from pydantic import BaseModel, root_validator, validator
-from src.utils.validators import validate_email, validate_phone
+from src.utils.validators import validate_email, validate_phone_number
+from src.repositorys import user_repo
 from typing import List
 
 
@@ -11,27 +12,33 @@ class OutUser(BaseModel):
     modified_at: int = None
     consumers: List[str] = []
 
-    @validator("email")
-    def validate_email_value(cls, value):
-        """validate email."""
-        if not validate_email(value):
-            raise ValueError("Invalid email.")
-        return value
-
-    @validator("phone")
-    def validate_phone_value(cls, value):
-        """Validate phone."""
-        if not validate_phone(value):
-            raise ValueError("Invalid phone.")
-        return value
-
-
 class InUser(BaseModel):
     """Model of register user."""
 
     email: str
     password: str
     phone: str = None
+
+    @validator("email")
+    def validate_email_value(cls, value):
+        """validate email."""
+        if not validate_email(value):
+            raise ValueError("Invalid email.")
+        user_exists = user_repo.filter_query(email=value)
+        if user_exists:
+            raise ValueError("email cannot be used, try another")
+        return value
+
+    @validator("phone")
+    def validate_phone_value(cls, value):
+        """Validate phone."""
+        if not validate_phone_number(value):
+            raise ValueError("Invalid phone.")
+        user_exists = user_repo.filter_query(phone=value)
+        if user_exists:
+            raise ValueError("phone cannot be used, try another")
+        return value
+
 
 
 class User(BaseModel):
