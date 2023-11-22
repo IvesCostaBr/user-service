@@ -4,7 +4,6 @@ import grpc, threading, time, logging
 logger = logging.getLogger(__name__)
 
 
-
 class GrpcClient:
     def __init__(self, service_name: str, host: str, stubClass: object, models: object):
         self.host = host
@@ -75,9 +74,10 @@ class GrpcClient:
             call = bidi_method(object_type(**payload))
             if call.sended:
                 return True
-            logger.critical("error send message, returned error -> {}".format(call.message))
+            logger.critical(
+                "error send message, returned error -> {}".format(call.message)
+            )
             print(call.message)
             return False
         except Exception as e:
             return False
-

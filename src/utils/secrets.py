@@ -10,7 +10,7 @@ def start_secret_env():
             os.environ.get("PROJECT_ID"), os.environ.get("PROJECT_ENVIRON")
         )
         open(".env", "w").write(secrets)
-    except:
+    except Exception as e:
         raise Exception("Error to load env config.")
 
 

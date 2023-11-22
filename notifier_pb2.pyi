@@ -14,7 +14,13 @@ class SendEvent(_message.Message):
     template_type: str
     channel: str
     payload: str
-    def __init__(self, consumer: _Optional[str] = ..., template_type: _Optional[str] = ..., channel: _Optional[str] = ..., payload: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        consumer: _Optional[str] = ...,
+        template_type: _Optional[str] = ...,
+        channel: _Optional[str] = ...,
+        payload: _Optional[str] = ...,
+    ) -> None: ...
 
 class Response(_message.Message):
     __slots__ = ["sended", "message"]
@@ -42,7 +48,13 @@ class HeathCheck(_message.Message):
     version: str
     service_name: str
     datetime: str
-    def __init__(self, status: _Optional[str] = ..., version: _Optional[str] = ..., service_name: _Optional[str] = ..., datetime: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        status: _Optional[str] = ...,
+        version: _Optional[str] = ...,
+        service_name: _Optional[str] = ...,
+        datetime: _Optional[str] = ...,
+    ) -> None: ...
 
 class SendHelthCheck(_message.Message):
     __slots__ = ["ping", "service"]
@@ -50,4 +62,6 @@ class SendHelthCheck(_message.Message):
     SERVICE_FIELD_NUMBER: _ClassVar[int]
     ping: str
     service: str
-    def __init__(self, ping: _Optional[str] = ..., service: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self, ping: _Optional[str] = ..., service: _Optional[str] = ...
+    ) -> None: ...

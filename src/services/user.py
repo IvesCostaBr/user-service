@@ -10,7 +10,7 @@ from src.utils.encrypt import (
     verify_otp,
 )
 from datetime import datetime
-from src.utils import notifier_grpc_client
+from src.infra import notifier_grpc_client
 import json
 
 
@@ -111,8 +111,8 @@ class UserService:
                         "otp_value": payload.get("code"),
                         "to_number": user.get("phone"),
                     }
-                )
-            }
+                ),
+            },
         )
         if not send_result:
             raise HTTPException(

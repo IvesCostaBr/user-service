@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 
 # load env vars from secret manager
-if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
+if os.environ.get("ENVIRONMENT") == "STG":
     from src.utils.secrets import start_secret_env
 
     if os.path.exists("./src/configs/credential-gcp.json"):
@@ -72,6 +72,12 @@ def custom_openapi():
             openapi_schema["paths"][route][method]["security"] = [{"FirebaseAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
+
+
+if os.getenv("ENVIRONMENT") == "DEV":
+    app.openapi = custom_openapi
+else:
+    os.remove(".env")
 
 
 @app.exception_handler(HTTPException)
