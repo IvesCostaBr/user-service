@@ -15,11 +15,14 @@ class GrpcClient:
         self.__start__connection()
 
     def __start__connection(self):
-        self.channel = grpc.insecure_channel(self.host)
-        self.stub = self.stuClass(self.channel)
-        print("starting connection grpc!")
-        self.is_connected = True
-        threading.Thread(target=self.validate_connection).start()
+        try:
+            self.channel = grpc.insecure_channel(self.host)
+            self.stub = self.stuClass(self.channel)
+            print("starting connection grpc!")
+            self.is_connected = True
+            threading.Thread(target=self.validate_connection).start()
+        except:
+            threading.Thread(target=self.validate_connection).start()
 
     def validate_connection(self):
         """Receiver heathchecks."""
