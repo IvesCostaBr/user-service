@@ -14,6 +14,7 @@ load_dotenv()
 from fastapi import FastAPI, Request, responses, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from src.routes.admin import user as admin_user
 from src.routes import user
 
 app = FastAPI(
@@ -30,11 +31,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Custom-Header"],
+    expose_headers=["X-Custom-Header", "Consumer"],
 )
 
 app.include_router(user.router, prefix="/api/user")
-
+app.include_router(admin_user.router, prefix="/api/admin/user")
 
 def custom_openapi():
     if app.openapi_schema:
@@ -74,7 +75,7 @@ def custom_openapi():
     return app.openapi_schema
 
 
-if os.getenv("ENVIRONMENT") == "DEV":
+if os.getenv("ENVIRONMENT") in ["DEV", "STG"]:
     app.openapi = custom_openapi
 else:
     os.remove(".env")

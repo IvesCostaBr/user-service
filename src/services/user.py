@@ -10,7 +10,8 @@ from src.utils.encrypt import (
     verify_otp,
 )
 from datetime import datetime
-from src.infra.grpc_clients import notifier_grpc_client
+from src.infra.grpc_clients import notifier_grpc_client, admin_grpc_client
+from src.infra.cache import cache_manager
 import json
 
 
@@ -23,6 +24,32 @@ class UserService:
         data.password = encrypt_key(data.password)
         doc_id = user_repo.create(data.model_dump())
         return {"detail": doc_id}
+    
+    
+    
+    def get_consumer(self, consumer_id: str):
+        """Get consumer by id."""
+        cached_data = cache_manager.get(id)
+        cached_data = None
+        if not cached_data:
+            result = admin_grpc_client.unary_call(
+                "GetConsumers", "FindConsumers", {"ids": [consumer_id]}
+            )
+            if not result:
+                return None
+            result = result.get("consumers")[0]
+            return result
+        else:
+            return cached_data
+        
+    def create_admin(self, data: user.InUserAdmin):
+        """Create user."""
+        data.password = encrypt_key(data.password)
+        data = data.model_dump()
+        data["is_admin"] = True
+        doc_id = user_repo.create(data)
+        return {"detail": doc_id}
+    
 
     def update(self, data):
         return

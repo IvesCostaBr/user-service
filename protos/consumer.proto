@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+option go_package = "./pb";
+
+package Consumer;
+
+service ConsumerService {
+  rpc Heathcheck (stream SendHelthCheck) returns (stream HeathCheck);
+  rpc GetConsumers (FindConsumers) returns (ListConsumers);
+  rpc GetCredentials (FindCredentials) returns (ListCredentials);
+  rpc GetProviders (FindProviders) returns (ListProviders);
+  rpc GetJourney (FindJouneys) returns (ListJourneys);
+}
+
+message Consumer {
+  string id = 1;
+  string name = 2;
+  string created_at = 3;
+  string client_id = 4;
+  string client_secret = 5;
+  string logo = 6;
+  repeated string credentials = 7;
+  string document = 8;
+  string treasury_vault = 9;
+  string default_asset = 10;
+}
+
+
+message FindConsumers {
+  repeated string ids = 1;
+}
+
+message FindCredentials {
+  repeated string ids = 1;
+}
+
+message FindProviders {
+  repeated string ids = 1;
+}
+
+message FindJouneys {
+  repeated string ids = 1;
+  string filter = 2;
+}
+
+message ListJourneys {
+  string data = 1;
+  bool error = 2;
+}
+
+message ListProviders {
+  repeated Provider providers = 1;
+  bool error = 2;
+}
+
+message ListCredentials {
+  repeated Credential credentials = 1;
+  bool error = 2;
+}
+
+
+message ListConsumers {
+  repeated Consumer consumers = 1;
+  bool error = 2;
+}
+
+message Credential {
+  string id = 1;
+  string provider = 2;
+  string keys = 3;
+  string created_at = 4;
+}
+
+message Provider {
+  string created_at = 1;
+  string name = 2;
+  string type = 3;
+  repeated string required_keys = 4;
+}
+
+message HeathCheck {
+  string status = 1;
+  string version = 2;
+  string service_name = 3;
+  string datetime = 4;
+}
+
+message SendHelthCheck {
+  string ping = 1;
+  string service = 2;
+}
+
+message Journey {
+  string cash_out_credential_id = 1;
+  string between_credential_id = 2;
+  string cash_in_credential_id = 3;
+  string consumer_id = 4;
+  string id = 5;
+}

@@ -1,22 +1,23 @@
 import grpc, threading, time, logging, os
-
+from google.protobuf.json_format import MessageToDict
 
 logger = logging.getLogger(__name__)
 
 
 class GrpcClient:
-    def __init__(self, service_name: str, host: str, stubClass: object, models: object):
+    def __init__(self, service_name: str, host: str, stubClass: object, models: object, secure_host: bool = False,):
         self.host = host
         self.service_name = service_name
         self.stuClass = stubClass
         self.stub = None
         self.model = models
         self.is_connected = False
+        self.secure_host = secure_host
         self.__start__connection()
 
     def __start__connection(self):
         try:
-            if os.environ.get("ENVIRONMENT") != "DEV":
+            if os.environ.get("ENVIRONMENT") != "DEV" or self.secure_host:
                 self.channel = grpc.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
             else:
                 self.channel = grpc.insecure_channel(self.host)
@@ -86,4 +87,21 @@ class GrpcClient:
             print(call.message)
             return False
         except Exception as e:
+            return False
+
+
+    def unary_call(self, method: str, objectName: str, payload: dict):
+        """Call grpc_method."""
+        try:
+            if not self.is_connected:
+                raise Exception("send grpc message to {}".format(self.service_name))
+            unary_method = getattr(self.stub, method)
+            object_type = getattr(self.model, objectName)
+            call = unary_method(object_type(**payload))
+            response_dict = MessageToDict(call)
+            if response_dict.get("error"):
+                return None
+            return response_dict
+        except Exception as e:
+            logger.critical("error send message, returned error -> {}".format(str(e)))
             return False

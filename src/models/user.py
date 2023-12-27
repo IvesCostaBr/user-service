@@ -4,12 +4,23 @@ from src.repositorys import user_repo
 from typing import List
 
 
+class OutConsumerData(BaseModel):
+    
+    id: str
+    logo: str = None
+    name: str = None
+    document: str = None
+    treasuryVault: str = None
+    defaultAsset: str = None
+
+
 class OutUser(BaseModel):
     id: str
     email: str = None
     phone: str = None
     created_at: int = None
     modified_at: int = None
+    consumer_data: OutConsumerData = None
     consumers: List[str] = []
 
 class InUser(BaseModel):
@@ -40,6 +51,10 @@ class InUser(BaseModel):
         return value
 
 
+class InUserAdmin(InUser):
+    """Base model of user admin."""
+    
+    consumer_id: str
 
 class User(BaseModel):
     user_id: str
