@@ -8,7 +8,7 @@ router = APIRouter(tags=["Admin - User"])
 
 
 @router.post("/register-super-user")
-async def register_user(data: user.InUser, user = Depends(verify_is_super_user)):
+async def register_user_admin(data: user.InUser, user = Depends(verify_is_super_user)):
     return user_service.create_admin(data)
 
 @router.post("/register")
