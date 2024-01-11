@@ -27,11 +27,11 @@ async def get_user_data(user: dict = Depends(verify_token)):
     return user
 
 
-@router.post("/otp", status_code=status.HTTP_201_CREATED)
+@router.post("/otp", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def login_user_otp(login: user.LoginUser):
     return user_service.login_passwordless(login)
 
 
 @router.get("/otp", status_code=status.HTTP_200_OK)
-async def verify_otp(otp: str):
-    return user_service.verify_login_code(otp)
+async def verify_otp(otp: str, id: str):
+    return user_service.verify_login_code(otp, id)

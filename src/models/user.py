@@ -77,7 +77,7 @@ class LoginUser(BaseModel):
                 raise ValueError("Phone is required for passwordless login.")
             return field_values
         else:
-            if field_values.get("email") and field_values.get("password"):
+            if field_values.get("email") or field_values.get("phone") and field_values.get("password"):
                 return field_values
             else:
                 raise ValueError("Email and password are required for login.")

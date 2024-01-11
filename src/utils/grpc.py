@@ -25,7 +25,8 @@ class GrpcClient:
             print("starting connection grpc!")
             self.is_connected = True
             threading.Thread(target=self.validate_connection).start()
-        except:
+        except Exception as ex:
+            logger.error(str(ex))
             threading.Thread(target=self.validate_connection).start()
 
     def validate_connection(self):

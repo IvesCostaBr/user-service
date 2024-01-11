@@ -66,25 +66,25 @@ class UserService:
 
     def login(self, data: user.LoginUser):
         """Login and generete token of user."""
-        if not data.passwordless:
-            user_exists = user_repo.filter_query(email=data.email)
-            if not len(user_exists):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"error": "unauthorized"},
-                )
-            user = user_exists[0]
-            data.password = encrypt_key(data.password)
-            if data.password != user.get("password"):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"error": "email or password incorrect."},
-                )
-            tokens = generate_tokens(user_exists[0])
-            return tokens
+        if data.email:
+            user = user_repo.filter_query(email=data.email)
         else:
-            user_exists = user_repo.filter_query(phone=data.phone)
-            return {"detail": "autehntication code sent to phone."}
+            user = user_repo.filter_query(phone=data.phone)
+
+        if not len(user):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "unauthorized"},
+            )
+        user = user[0]
+        data.password = encrypt_key(data.password)
+        if data.password != user.get("password"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "email or password incorrect."},
+            )
+        tokens = generate_tokens(user)
+        return tokens
 
     def __verify_request_login_in_open(self, phone: str):
         """Verify exists login otp in open."""
@@ -107,7 +107,7 @@ class UserService:
 
     def login_passwordless(self, data: user.LoginUser):
         """Send login code with phone or email."""
-        self.__verify_request_login_in_open(data.phone)
+        # self.__verify_request_login_in_open(data.phone)
         if not data.phone:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -148,18 +148,17 @@ class UserService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "error send code.please try again."},
             )
-        login_repo.create(payload)
-        return {"detail": "autehntication code sent to phone."}
+        id = login_repo.create(payload)
+        return {"id": id}
 
-    def verify_login_code(self, otp: str):
+    def verify_login_code(self, otp: str, id: str):
         """Verify login code."""
-        login_code = login_repo.filter_query(code=otp, is_validated=False)
-        if not login_code:
+        login_code = login_repo.get(id)
+        if not login_code or login_code.get("code") != otp or login_code.get('is_validated'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "code not valid."},
             )
-        login_code = login_code[0]
         if verify_otp(login_code.get("code")):
             login_repo.update(login_code.get("_id"), {"is_validated": True})
             return generate_tokens(login_code)
