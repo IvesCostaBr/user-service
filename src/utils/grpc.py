@@ -5,7 +5,14 @@ logger = logging.getLogger(__name__)
 
 
 class GrpcClient:
-    def __init__(self, service_name: str, host: str, stubClass: object, models: object, secure_host: bool = False,):
+    def __init__(
+        self,
+        service_name: str,
+        host: str,
+        stubClass: object,
+        models: object,
+        secure_host: bool = False,
+    ):
         self.host = host
         self.service_name = service_name
         self.stuClass = stubClass
@@ -18,7 +25,9 @@ class GrpcClient:
     def __start__connection(self):
         try:
             if os.environ.get("ENVIRONMENT") != "DEV" or self.secure_host:
-                self.channel = grpc.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
+                self.channel = grpc.secure_channel(
+                    self.host, credentials=grpc.ssl_channel_credentials()
+                )
             else:
                 self.channel = grpc.insecure_channel(self.host)
             self.stub = self.stuClass(self.channel)
@@ -89,7 +98,6 @@ class GrpcClient:
             return False
         except Exception as e:
             return False
-
 
     def unary_call(self, method: str, objectName: str, payload: dict):
         """Call grpc_method."""

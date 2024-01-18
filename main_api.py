@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(user.router, prefix="/api/user")
 app.include_router(admin_user.router, prefix="/api/admin/user")
 
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema

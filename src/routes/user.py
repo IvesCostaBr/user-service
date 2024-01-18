@@ -13,7 +13,7 @@ async def login_user(data: user.LoginUser):
     return user_service.login(data)
 
 @router.post("/register")
-async def register_user(data: user.InUserAdmin):
+async def register_user(data: user.InUser):
     return user_service.create(data)
 
 @router.post(

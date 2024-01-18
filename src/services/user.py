@@ -42,7 +42,7 @@ class UserService:
             return result
         else:
             return cached_data
-        
+
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
         data.password = encrypt_key(data.password)
@@ -50,18 +50,17 @@ class UserService:
         data["is_admin"] = True
         doc_id = user_repo.create(data)
         return {"detail": doc_id}
-    
 
     def update(self, data):
         return
 
     def get(self, id):
         return None
-    
+
     def forget_password(self, email: str):
         """Send email to reset password."""
         return True
-    
+
     def recovery_password(self, email: str, code: str):
         return True
 
@@ -69,8 +68,10 @@ class UserService:
         """Login and generete token of user."""
         if data.email:
             user = user_repo.filter_query(email=data.email)
-        else:
+        elif data.phone:
             user = user_repo.filter_query(phone=data.phone)
+        elif data.document:
+            user = user_repo.filter_query(document=data.document)
 
         if not len(user):
             raise HTTPException(
@@ -155,7 +156,11 @@ class UserService:
     def verify_login_code(self, otp: str, id: str):
         """Verify login code."""
         login_code = login_repo.get(id)
-        if not login_code or login_code.get("code") != otp or login_code.get('is_validated'):
+        if (
+            not login_code
+            or login_code.get("code") != otp
+            or login_code.get("is_validated")
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "code not valid."},

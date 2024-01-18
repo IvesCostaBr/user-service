@@ -5,7 +5,6 @@ from typing import List
 
 
 class OutConsumerData(BaseModel):
-    
     id: str
     logo: str = None
     name: str = None
@@ -23,10 +22,11 @@ class OutUser(BaseModel):
     consumer_data: OutConsumerData = None
     consumers: List[str] = []
 
+
 class InUser(BaseModel):
     """Model of register user."""
 
-    email: str
+    email: str = None
     password: str
     phone: str = None
     extra_fields: dict = None
@@ -54,8 +54,9 @@ class InUser(BaseModel):
 
 class InUserAdmin(InUser):
     """Base model of user admin."""
-    
+
     consumer_id: str
+
 
 class User(BaseModel):
     user_id: str
@@ -67,6 +68,7 @@ class User(BaseModel):
 class LoginUser(BaseModel):
     email: str = None
     phone: str = None
+    document: str = None
     password: str = None
     passwordless: bool = False
 
@@ -78,7 +80,12 @@ class LoginUser(BaseModel):
                 raise ValueError("Phone is required for passwordless login.")
             return field_values
         else:
-            if field_values.get("email") or field_values.get("phone") and field_values.get("password"):
+            if (
+                field_values.get("email")
+                or field_values.get("document")
+                or field_values.get("phone")
+                and field_values.get("password")
+            ):
                 return field_values
             else:
                 raise ValueError("Email and password are required for login.")

@@ -6,7 +6,7 @@ notifier_grpc_client = GrpcClient(
     os.environ.get("GRPC_HOST_NOTIFIER"),
     notifier_pb2_grpc.NotifierStub,
     notifier_pb2,
-    True
+    True,
 )
 admin_grpc_client = GrpcClient(
     f"admin-service-{os.environ.get('ENVIRONMENT')}",
