@@ -2,7 +2,7 @@ from fastapi.routing import APIRouter
 from src.services import user_service
 from fastapi import Depends
 from src.models import user, auth
-from src.utils.auth import verify_token
+from src.utils.auth import verify_token, verify_is_super_user
 from starlette import status
 
 router = APIRouter(tags=["User"])
@@ -12,6 +12,9 @@ router = APIRouter(tags=["User"])
 async def login_user(data: user.LoginUser):
     return user_service.login(data)
 
+@router.post("/register")
+async def register_user(data: user.InUserAdmin):
+    return user_service.create(data)
 
 @router.post(
     "/refresh", response_model=auth.RefreshToken, status_code=status.HTTP_201_CREATED
@@ -26,6 +29,9 @@ async def get_user_data(user: dict = Depends(verify_token)):
     user["consumer_data"] = user_service.get_consumer(user.get("consumer_id"))
     return user
 
+@router.post("/register")
+async def register_user(data: user.InUserAdmin):
+    return user_service.create(data, user = Depends(verify_is_super_user))
 
 @router.post("/otp", status_code=status.HTTP_201_CREATED, response_model=dict)
 async def login_user_otp(login: user.LoginUser):

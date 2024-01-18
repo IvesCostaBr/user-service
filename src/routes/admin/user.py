@@ -12,5 +12,5 @@ async def register_user_admin(data: user.InUser, user = Depends(verify_is_super_
     return user_service.create_admin(data)
 
 @router.post("/register")
-async def register_user(data: user.InUserAdmin):
-    return user_service.create(data, user = Depends(verify_is_super_user))
+async def register_user(data: user.InUserAdmin, user = Depends(verify_is_super_user)):
+    return user_service.create(data)
