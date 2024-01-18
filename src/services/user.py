@@ -19,14 +19,15 @@ class UserService:
     def __init__(self) -> None:
         self.entity = "user"
 
-    def create(self, data: user.InUser):
+    def create(self, data: user.InUser, user: dict = None):
         """Create user."""
         data.password = encrypt_key(data.password)
-        doc_id = user_repo.create(data.model_dump())
+        user_data = data.model_dump()
+        if user_data.get("extra_fields"):
+            user_data.update(user_data.get("extra_fields"))
+        doc_id = user_repo.create(user_data)
         return {"detail": doc_id}
-    
-    
-    
+
     def get_consumer(self, consumer_id: str):
         """Get consumer by id."""
         cached_data = cache_manager.get(id)

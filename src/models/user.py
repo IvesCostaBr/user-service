@@ -29,6 +29,7 @@ class InUser(BaseModel):
     email: str
     password: str
     phone: str = None
+    extra_fields: dict = None
 
     @validator("email")
     def validate_email_value(cls, value):

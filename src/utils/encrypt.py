@@ -55,6 +55,7 @@ def generate_tokens(user_data: dict):
         "access_token": access_token,
         "refresh_token": refresh_token,
         "expires_in": int(total_seconds),
+        "user_id": user_data.get('user_id')
     }
 
 

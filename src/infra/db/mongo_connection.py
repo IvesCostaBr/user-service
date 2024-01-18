@@ -18,9 +18,12 @@ class MongoConnection(AbstractConnection):
 
     def create_connection(self):
         """Create connection with MongoDB."""
-        self.client = MongoClient(self.host, self.port)
-        print("MongoDB connected successfully!!")
-        self.db = self.client[self.db_name]
+        try:
+            self.client = MongoClient(self.host, self.port)
+            print("MongoDB connected successfully!!")
+            self.db = self.client[self.db_name]
+        except Exception as e:
+            self.db = None
 
     def get(self, entity: str, id: str, use_cache: bool = True):
         object_id = ObjectId(id)
