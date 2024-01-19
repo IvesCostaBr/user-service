@@ -99,6 +99,11 @@ class UserService:
                 detail={"error": "email or password incorrect."},
             )
         tokens = generate_tokens(user)
+        if not tokens:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "error generete new token"},
+            )
         return tokens
 
     def __verify_request_login_in_open(self, phone: str):
