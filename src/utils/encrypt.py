@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import datetime, timedelta
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-import base64, os, jwt, pyotp
+import base64, os, jwt, pyotp, logging
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 totp = pyotp.TOTP("base32secret3232", interval=900)
@@ -66,10 +66,12 @@ def validate_access_token(access_token):
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
             return True, decoded_token
 
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as ex:
+        logging.error(ex)
         return False, None
 
     except jwt.InvalidTokenError:
+        logging.error(ex)
         return False, None
 
 

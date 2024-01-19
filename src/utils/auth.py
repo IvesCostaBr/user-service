@@ -3,6 +3,7 @@ from fastapi.security import APIKeyHeader
 from fastapi import Depends, HTTPException
 from src.utils.encrypt import validate_access_token
 from starlette import status
+import logging
 
 id_token = APIKeyHeader(name="Authorization")
 
@@ -17,7 +18,7 @@ def verify_token(token: str = Depends(id_token)):
             detail="not authenticated",
         )
     user = user_repo.get(payload.get("sub"))
-    print(f"user not found {payload.get('sub')}")
+    logging.error(f"user not found {payload.get('sub')}")
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
