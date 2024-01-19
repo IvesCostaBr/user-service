@@ -17,14 +17,20 @@ def verify_token(token: str = Depends(id_token)):
             detail="not authenticated",
         )
     user = user_repo.get(payload.get("sub"))
-    user["consumer_id"] = None
-    if user.get("consumers"):
-        user["consumer_id"] = user.get("consumers")[0]
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="not authenticated",
         )
+    user["consumer_id"] = user.get("consumer")
+    if user.get("consumers") and not user.get("consumer_id"):
+        try:
+            user["consumer_id"] = user.get("consumers")[0]
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="no consumers were found",
+            )
     return user
 
 

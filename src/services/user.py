@@ -34,9 +34,9 @@ class UserService:
                 docid = f'{user_data.get("consumer")}|{user_data.get("user_id")}'
             else:
                 raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": "user already exists"},
-            )
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={"error": "user already exists"},
+                )
         doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
 

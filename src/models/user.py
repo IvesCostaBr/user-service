@@ -17,10 +17,11 @@ class OutUser(BaseModel):
     id: str
     email: str = None
     phone: str = None
+    document: str = None
     created_at: int = None
     modified_at: int = None
     consumer_data: OutConsumerData = None
-    consumers: List[str] = []
+    consumers: List[dict] = []
 
 
 class InUser(BaseModel):

@@ -4,6 +4,7 @@ from fastapi import Depends
 from src.models import user, auth
 from src.utils.auth import verify_token, verify_is_super_user
 from starlette import status
+from copy import deepcopy
 
 router = APIRouter(tags=["User"])
 
@@ -25,9 +26,15 @@ async def refresh_token_user(refresh_token: str):
     return user_service.refresh_token(refresh_token)
 
 
-@router.get("/me", response_model=user.OutUser, status_code=status.HTTP_200_OK)
+@router.get(
+    "/me",
+    responses={200: {"model": user.OutUser, "description": "Return data of user"}},
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+)
 async def get_user_data(user: dict = Depends(verify_token)):
-    user["id"] = str(user["_id"])
+    user["id"] = str(user["_id"]) and user.pop("_id")
+    user.pop("password")
     user["consumer_data"] = user_service.get_consumer(user.get("consumer_id"))
     return user
 

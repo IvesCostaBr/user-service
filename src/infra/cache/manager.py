@@ -31,9 +31,10 @@ class CacheManager:
                 data = self.__parse_dict(data)
             return self.instance.create(key, data, ttl)
         except Exception as e:
-            logger.critical(
-                {"message": "error saving cache", "error": str(e), "payload": data}
-            )
+            # logger.critical(
+            #     {"message": "error saving cache", "error": str(e), "payload": data}
+            # )
+            pass
 
     def get(self, key):
         """Get document by key."""
