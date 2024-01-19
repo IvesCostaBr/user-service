@@ -30,32 +30,32 @@ jobs:
       - name: exec tests
         run: echo ""
 
-  checkoutImage:
-    name: Image Valid
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: "${{ github.ref }}"
+  # checkoutImage:
+  #   name: Image Valid
+  #   needs: [test]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: "${{ github.ref }}"
 
-      - name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v1"
-        with:
-          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+  #     - name: "Authenticate to Google Cloud"
+  #       uses: "google-github-actions/auth@v1"
+  #       with:
+  #         credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
 
-      - name: get image gcr
-        id: get_image_repo
-        run: |
-          existing_tags=$(gcloud container images list-tags --filter="tags:${{ env.TAG }}" --format=json gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }})
-          if [[ "$existing_tags" == "[]" ]]; then
-              echo "result=0" >> "$GITHUB_OUTPUT"
-          else
-              echo "result=1" >> "$GITHUB_OUTPUT"
-          fi
-    outputs:
-      value: ${{ steps.get_image_repo.outputs.result }}
+  #     - name: get image gcr
+  #       id: get_image_repo
+  #       run: |
+  #         existing_tags=$(gcloud container images list-tags --filter="tags:${{ env.TAG }}" --format=json gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }})
+  #         if [[ "$existing_tags" == "[]" ]]; then
+  #             echo "result=0" >> "$GITHUB_OUTPUT"
+  #         else
+  #             echo "result=1" >> "$GITHUB_OUTPUT"
+  #         fi
+  #   outputs:
+  #     value: ${{ steps.get_image_repo.outputs.result }}
 
   build:
     name: Build
