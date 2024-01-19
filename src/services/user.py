@@ -32,7 +32,6 @@ class UserService:
                 user_data.update(user_data.get("extra_data"))
                 user_data.pop("extra_data")
                 docid = f'{user_data.get("consumer")}|{user_data.get("user_id")}'
-                user_data["user_id"] = docid
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
