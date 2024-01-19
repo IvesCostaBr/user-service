@@ -31,6 +31,16 @@ class InUser(BaseModel):
     phone: str = None
     extra_fields: dict = None
 
+    @validator("extra_data")
+    def validate_extra_data(cls, value):
+        """Validate extra data."""
+        if value:
+            if  value.get("consumer"):
+                return value
+            else:
+                raise ValueError("consumer is required in extra_data.")
+        return value
+
     @validator("email")
     def validate_email_value(cls, value):
         """validate email."""

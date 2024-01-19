@@ -23,9 +23,11 @@ class UserService:
         """Create user."""
         data.password = encrypt_key(data.password)
         user_data = data.model_dump()
+        docid = None
         if user_data.get("extra_fields"):
             user_data.update(user_data.get("extra_fields"))
-        doc_id = user_repo.create(user_data)
+            docid = f'{data.get("consumer")}|{user_data.get("user_id")}'
+        doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
 
     def get_consumer(self, consumer_id: str):

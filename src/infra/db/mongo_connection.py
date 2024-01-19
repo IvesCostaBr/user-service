@@ -38,7 +38,10 @@ class MongoConnection(AbstractConnection):
         return docs
 
     def create(self, entity: str, data: dict):
+        """Create a new document in MongoDB."""
         data["created_at"] = time.mktime(datetime.now().timetuple())
+        if id:
+            data["_id"] = id
         new_data = self.db[entity].insert_one(data)
         return str(new_data.inserted_id)
 
