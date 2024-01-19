@@ -25,9 +25,18 @@ class UserService:
         user_data = data.model_dump()
         docid = None
         if user_data.get("extra_data"):
-            user_data.update(user_data.get("extra_data"))
-            user_data.pop("extra_data")
-            docid = f'{data.get("consumer")}|{user_data.get("user_id")}'
+            user_exists = user_repo.get(
+                f'{user_data.get("extra_data").get("consumer")}|{user_data.get("extra_data").get("user_id")}'
+            )
+            if not user_exists:
+                user_data.update(user_data.get("extra_data"))
+                user_data.pop("extra_data")
+                docid = f'{user_data.get("consumer")}|{user_data.get("user_id")}'
+            else:
+                raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "user already exists"},
+            )
         doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
 

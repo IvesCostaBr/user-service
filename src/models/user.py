@@ -28,6 +28,7 @@ class InUser(BaseModel):
 
     email: str = None
     password: str
+    document: str = None
     phone: str = None
     extra_data: dict = None
 

@@ -2,6 +2,7 @@ from src.infra.db.abstract_conneection import AbstractConnection
 from pymongo.mongo_client import MongoClient
 from bson import ObjectId
 from datetime import datetime
+from src.infra.cache import cache_manager
 import time
 
 
@@ -26,12 +27,17 @@ class MongoConnection(AbstractConnection):
             self.db = None
 
     def get(self, entity: str, id: str, use_cache: bool = True):
-        object_id = ObjectId(id)
-        doc = self.db[entity].find_one({"_id": object_id})
-        if doc is not None:
-            return doc
+        value_cached = cache_manager.get(id) if use_cache else False
+        if not value_cached:
+            object_id = ObjectId(id) if type(id) != str else id
+            doc = self.db[entity].find_one({"_id": object_id})
+            if doc is not None:
+                cache_manager.save(id, doc, 1200)
+                return doc
+            else:
+                return None
         else:
-            return None
+            return value_cached
 
     def get_all(self, entity: str, limit: int = 100):
         docs = list(self.db[entity].find(limit))

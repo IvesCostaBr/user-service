@@ -14,7 +14,7 @@ class UserRepository:
 
     def get(self, id: str):
         """Get a User by id"""
-        result = self.db.get(self.entity, id)
+        result = self.db.get(self.entity, id, False)
         return result
 
     def get_all(self):
