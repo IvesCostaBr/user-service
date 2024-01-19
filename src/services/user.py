@@ -19,7 +19,7 @@ class UserService:
     def __init__(self) -> None:
         self.entity = "user"
 
-    def create(self, data: user.InUser, user: dict = None):
+    def create(self, data: user.InUser):
         """Create user."""
         data.password = encrypt_key(data.password)
         user_data = data.model_dump()
