@@ -29,13 +29,13 @@ class InUser(BaseModel):
     email: str = None
     password: str
     phone: str = None
-    extra_fields: dict = None
+    extra_data: dict = None
 
     @validator("extra_data")
     def validate_extra_data(cls, value):
         """Validate extra data."""
         if value:
-            if  value.get("consumer"):
+            if value.get("consumer"):
                 return value
             else:
                 raise ValueError("consumer is required in extra_data.")

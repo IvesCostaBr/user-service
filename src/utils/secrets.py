@@ -11,7 +11,9 @@ def start_secret_env():
         )
         open(".env", "w").write(secrets)
     except Exception as e:
-        raise Exception(f'Error to load env config. POJECT: {os.environ.get("PROJECT_ID")} | ENV: {os.environ.get("PROJECT_ENVIRON")}')
+        raise Exception(
+            f'Error to load env config. POJECT: {os.environ.get("PROJECT_ID")} | ENV: {os.environ.get("PROJECT_ENVIRON")}'
+        )
 
 
 def access_secret_version(project_id, project_environ, version_id="latest"):
