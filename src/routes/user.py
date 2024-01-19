@@ -33,8 +33,6 @@ async def refresh_token_user(refresh_token: str):
     status_code=status.HTTP_200_OK,
 )
 async def get_user_data(user: dict = Depends(verify_token)):
-    user["id"] = str(user["_id"]) and user.pop("_id")
-    user.pop("password")
     user["consumer_data"] = user_service.get_consumer(user.get("consumer_id"))
     return user
 

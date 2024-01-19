@@ -29,9 +29,13 @@ class MongoConnection(AbstractConnection):
     def get(self, entity: str, id: str, use_cache: bool = True):
         value_cached = cache_manager.get(id) if use_cache else False
         if not value_cached:
-            object_id = ObjectId(id) if type(id) != str else id
+            try:
+                object_id = ObjectId(id)
+            except:
+                object_id = id
             doc = self.db[entity].find_one({"_id": object_id})
             if doc is not None:
+                doc["id"] = str(doc.pop("_id"))
                 cache_manager.save(id, doc, 1200)
                 return doc
             else:
