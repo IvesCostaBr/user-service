@@ -7,7 +7,7 @@ class UserRepository:
         self.db: AbstractConnection = database
         self.entity = "users"
 
-    def create(self, data: dict, id: str):
+    def create(self, data: dict, id: str = None):
         """Create a new User"""
         result = self.db.create(self.entity, data, id)
         return result
