@@ -34,7 +34,7 @@ def generate_tokens(user_data: dict):
         (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
     ).total_seconds()
     access_token_payload = {
-        "sub": str(user_data.get("_id")),
+        "sub": str(user_data.get("id")),
         "exp": datetime.utcnow() + timedelta(minutes=15),
         "iat": datetime.utcnow(),
         "nbf": datetime.utcnow(),
@@ -43,7 +43,7 @@ def generate_tokens(user_data: dict):
     access_token = jwt.encode(access_token_payload, SECRET_KEY, algorithm="HS256")
 
     refresh_token_payload = {
-        "sub": str(user_data.get("_id")),
+        "sub": str(user_data.get("id")),
         "exp": datetime.utcnow() + timedelta(days=7),
         "iat": datetime.utcnow(),
         "nbf": datetime.utcnow(),
