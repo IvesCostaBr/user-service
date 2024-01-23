@@ -19,7 +19,7 @@ class UserService:
     def __init__(self) -> None:
         self.entity = "user"
 
-    def create(self, data: user.InUser):
+    def create(self, data: user.InUser, user_admin: dict = None):
         """Create user."""
         data.password = encrypt_key(data.password)
         user_data = data.model_dump()
@@ -37,6 +37,10 @@ class UserService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={"error": "user already exists"},
                 )
+        elif user_admin:
+            user_data["is_admin"] = True
+            user_data["consumers"] = [user_admin.get("consumer_id")]
+
         doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
 
