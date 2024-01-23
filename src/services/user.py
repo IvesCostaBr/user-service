@@ -23,6 +23,7 @@ class UserService:
         """Create user."""
         data.password = encrypt_key(data.password)
         user_data = data.model_dump()
+        user_data["is_admin"] = False
         docid = None
         if user_data.get("extra_data"):
             user_exists = user_repo.get(
