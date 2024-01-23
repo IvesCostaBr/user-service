@@ -1,4 +1,4 @@
-.env
+.env*
 /venv/
 import_data/
 import_data.py
