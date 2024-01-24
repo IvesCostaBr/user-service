@@ -93,14 +93,14 @@ class UserService:
         elif data.document:
             user = user_repo.filter_query(document=data.document)
 
-        if not len(user):
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "unauthorized"},
             )
         user = user[0]
         data.password = encrypt_key(data.password)
-        if data.password != user.get("password"):
+        if data.password != user_repo.get_password(user.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "email or password incorrect."},

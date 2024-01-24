@@ -33,3 +33,10 @@ class UserRepository:
         """verify exists document."""
         result = self.db.exists(self.entity, kwargs)
         return result
+
+    def get_password(self, id: str):
+        """Get password by id"""
+        result = self.db.get(self.entity, id, False)
+        if result:
+            return result.get("password")
+        return result
