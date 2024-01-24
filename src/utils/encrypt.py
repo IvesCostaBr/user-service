@@ -86,7 +86,6 @@ def validate_refresh_token(refresh_token):
             (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
         ).total_seconds()
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
-            new_access_token
             new_access_token = jwt.encode(
                 {
                     "sub": decoded_token["sub"],
@@ -96,7 +95,7 @@ def validate_refresh_token(refresh_token):
                 algorithm="HS256",
             )
 
-            return {"access_token": new_access_token, "expires_in": total_seconds}
+            return {"access_token": new_access_token, "expires_in": int(total_seconds)}
     except jwt.ExpiredSignatureError:
         # O refresh token expirou
         return None
