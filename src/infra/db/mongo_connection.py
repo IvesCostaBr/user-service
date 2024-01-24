@@ -66,9 +66,46 @@ class MongoConnection(AbstractConnection):
         except:
             return False
 
+    def __format_filter(self, query: dict) -> list:
+        filter_formated = []
+        for key, value in query.items():
+            if "__" not in key.lower():
+                filter_formated.append({key: value})
+            elif "__lt" in key.lower():
+                filter_formated.append({key.replace("__lt", ""): {"$lt": value}})
+            elif "__lte" in key.lower():
+                filter_formated.append({key.replace("__lte", ""): {"$lte": value}})
+            elif "__range" in key.lower():
+                start, end = value
+                filter_formated.append(
+                    {key.replace("__range", ""): {"$gte": start, "$lte": end}}
+                )
+            elif "__gt" in key.lower():
+                filter_formated.append({key.replace("__gt", ""): {"$gt": value}})
+            elif "__gte" in key.lower():
+                filter_formated.append({key.replace("__gte", ""): {"$gte": value}})
+            elif "__in" in key.lower():
+                filter_formated.append({key.replace("__in", ""): {"$in": value}})
+            elif "__in" in key.lower():
+                filter_formated.append({key.replace("__nt", ""): {"$not": value}})
+        return filter_formated
+
+
     def filter_query(self, entity: str, query: dict):
-        result = self.db[entity].find(query)
-        return list(result)
+        response_list = []
+        formatted_query = self.__format_filter(query)
+        result = self.db[entity].find({"$and": formatted_query})
+        if not result:
+            return []
+        for each in result:
+            each["id"] = str(each["_id"])
+            each.pop("_id")
+            try:
+                each.pop("password")
+            except:
+                None
+            response_list.append(each)
+        return response_list
 
     def exists(self, entity: str, query: dict):
         result = self.db[entity].find(query)

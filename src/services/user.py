@@ -39,8 +39,10 @@ class UserService:
                     detail={"error": "user already exists"},
                 )
         elif user_admin:
+            # validar se não existe outro usuario admin com o mesmo email, documento ou telefone.
             user_data["is_admin"] = True
             user_data["consumers"] = [user_admin.get("consumer_id")]
+            user_data.pop("consumer_id")
 
         doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
@@ -65,6 +67,7 @@ class UserService:
         data.password = encrypt_key(data.password)
         data = data.model_dump()
         data["is_admin"] = True
+        data["is_super"]
         doc_id = user_repo.create(data)
         return {"detail": doc_id}
 
@@ -205,3 +208,33 @@ class UserService:
                 detail={"message": "error generete new token"},
             )
         return tokens
+
+    def get_user_admin(self, user_admin: dict):
+        """List user admin."""
+        consumer_id = user_admin.get("consumer_id")
+        result = user_repo.filter_query(consumers__in=[consumer_id], is_admin=True)
+        return {"data": result, "total": len(result)}
+    
+    def get_super_admin(self):
+        """List super admin."""
+        
+        result = user_repo.filter_query(is_super_admin=True)
+        return {"data": result, "total": len(result)}
+    
+    def get_user(self, id: str, user_admin: dict):
+        """Get user admin."""
+        user = user_repo.get(id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"message": "user not found"},
+            )
+        if user.get("is_admin") and user_admin.get("consumer_id") in user.get("consumers"):
+            return user
+        elif user.get("is_super_admin") and user_admin.get("is_super_admin"):
+            return user
+        
+        raise  HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "user not found"},
+        )

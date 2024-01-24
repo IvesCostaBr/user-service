@@ -2,9 +2,8 @@ from fastapi.routing import APIRouter
 from src.services import user_service
 from fastapi import Depends
 from src.models import user, auth
-from src.utils.auth import verify_token, verify_is_super_user
+from src.utils.auth import verify_token
 from starlette import status
-from copy import deepcopy
 
 router = APIRouter(tags=["User"])
 
