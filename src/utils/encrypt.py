@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import datetime, timedelta
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from src.repositorys import blacklist_repo
 import base64, os, jwt, pyotp, logging
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -75,11 +76,12 @@ def validate_access_token(access_token):
 
 def validate_refresh_token(refresh_token):
     try:
+        found_refresh_token = blacklist_repo.filter_query(refresh_token=refresh_token)
         decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
         total_seconds = (
             (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
         ).total_seconds()
-        if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
+        if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]) and not found_refresh_token:
             new_access_token = jwt.encode(
                 {
                     "sub": decoded_token["sub"],
@@ -95,7 +97,7 @@ def validate_refresh_token(refresh_token):
                 "nbf": datetime.utcnow(),
             }
             new_refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm="HS256")
-
+            blacklist_repo.create({"refresh_token": refresh_token})
             return {"access_token": new_access_token, "refresh_token": new_refresh_token, "expires_in": int(total_seconds)}
     except jwt.ExpiredSignatureError:
         # O refresh token expirou

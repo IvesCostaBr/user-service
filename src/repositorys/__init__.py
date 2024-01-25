@@ -22,3 +22,5 @@ for module_name in module_files:
                 continue
             globals()[f"{instance.entity}_repo"] = instance
             modules_loaded.append(f"{instance.entity}_repo")
+
+print(modules_loaded)
