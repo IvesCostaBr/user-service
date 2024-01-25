@@ -100,7 +100,7 @@ class UserService:
             )
         user = user[0]
         data.password = encrypt_key(data.password)
-        if data.password != user_repo.get_password(user.get("id")):
+        if data.password != user_repo.get_password(user.get("git adid")):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "email or password incorrect."},
@@ -113,24 +113,24 @@ class UserService:
             )
         return tokens
 
-    def __verify_request_login_in_open(self, phone: str):
-        """Verify exists login otp in open."""
-        login_code = login_repo.filter_query(phone=phone, is_validated=False)
-        if login_code:
-            not_used = False
-            for each in login_code:
-                last_login = datetime.utcfromtimestamp(each.get("created_at"))
-                date_now = datetime.now()
-                diff_minutes = (date_now - last_login).total_seconds() / 60
-                if diff_minutes >= 5:
-                    login_repo.update(each.get("_id"), {"is_validated": True})
-                else:
-                    not_used = True
-            if not_used:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"error": "already exists code."},
-                )
+    # def __verify_request_login_in_open(self, phone: str):
+    #     """Verify exists login otp in open."""
+    #     login_code = login_repo.filter_query(phone=phone, is_validated=False)
+    #     if login_code:
+    #         not_used = False
+    #         for each in login_code:
+    #             last_login = datetime.utcfromtimestamp(each.get("created_at"))
+    #             date_now = datetime.now()
+    #             diff_minutes = (date_now - last_login).total_seconds() / 60
+    #             if diff_minutes >= 5:
+    #                 login_repo.update(each.get("_id"), {"is_validated": True})
+    #             else:
+    #                 not_used = True
+    #         if not_used:
+    #             raise HTTPException(
+    #                 status_code=status.HTTP_400_BAD_REQUEST,
+    #                 detail={"error": "already exists code."},
+    #             )
 
     def login_passwordless(self, data: user.LoginUser):
         """Send login code with phone or email."""

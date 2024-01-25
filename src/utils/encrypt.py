@@ -88,8 +88,15 @@ def validate_refresh_token(refresh_token):
                 SECRET_KEY,
                 algorithm="HS256",
             )
+            refresh_token_payload = {
+                "sub": decoded_token["sub"],
+                "exp": datetime.utcnow() + timedelta(days=7),
+                "iat": datetime.utcnow(),
+                "nbf": datetime.utcnow(),
+            }
+            new_refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm="HS256")
 
-            return {"access_token": new_access_token, "expires_in": int(total_seconds)}
+            return {"access_token": new_access_token, "refresh_token": new_refresh_token, "expires_in": int(total_seconds)}
     except jwt.ExpiredSignatureError:
         # O refresh token expirou
         return None
