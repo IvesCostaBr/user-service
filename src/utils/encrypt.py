@@ -69,15 +69,9 @@ def validate_access_token(access_token):
 
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
             return True, decoded_token
-
-    except jwt.ExpiredSignatureError as ex:
+    except Exception as ex:
         logging.error(ex)
         return False, None
-
-    except jwt.InvalidTokenError:
-        logging.error(ex)
-        return False, None
-
 
 def validate_refresh_token(refresh_token):
     try:
