@@ -39,7 +39,11 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
     total_seconds = (
         (datetime.utcnow() + timestamp_access) - datetime.now()
     ).total_seconds()
-    user_id = user_data.get("_id") if user_data.get("_id") else user_data.get("id")
+    if type(user_data) != str:
+        user_id = user_data.get("_id") if user_data.get("_id") else user_data.get("id")
+    else:
+        user_id = user_data
+
     if not user_id:
         return None
     user_id = str(user_id)

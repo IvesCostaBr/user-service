@@ -1,8 +1,8 @@
 from fastapi.routing import APIRouter
 from src.services import user_service
 from fastapi import Depends
-from src.models import user, auth
-from src.utils.auth import authenticate_user
+from src.models import user, auth, generic
+from src.utils.auth import authenticate_user, verify_api_key
 from starlette import status
 
 router = APIRouter(tags=["User"])
@@ -13,9 +13,9 @@ async def login_user(data: user.LoginUser):
     return user_service.login(data)
 
 
-@router.post("/register")
-async def register_user(data: user.InUser):
-    return user_service.create(data)
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=generic.SignUpUserResponse)
+async def register_user(data: user.InUser, consumer: dict = Depends(verify_api_key)):
+    return user_service.create(data, consumer_id=consumer)
 
 
 @router.post(

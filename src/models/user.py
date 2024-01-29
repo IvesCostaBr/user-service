@@ -27,6 +27,7 @@ class OutUser(BaseModel):
 class InUser(BaseModel):
     """Model of register user."""
 
+    name: str = None
     email: str = None
     password: str
     document: str = None
@@ -37,10 +38,10 @@ class InUser(BaseModel):
     def validate_extra_data(cls, value):
         """Validate extra data."""
         if value:
-            if value.get("consumer"):
+            if value.get("consumer") and value.get("user_id"):
                 return value
             else:
-                raise ValueError("consumer is required in extra_data.")
+                raise ValueError("this keys 'consumer' and 'user_id' is required in extra_data.")
         return value
 
     @validator("email")
@@ -54,6 +55,16 @@ class InUser(BaseModel):
         return value
 
     @validator("phone")
+    def validate_phone_value(cls, value):
+        """Validate phone."""
+        if not validate_phone_number(value):
+            raise ValueError("Invalid phone.")
+        user_exists = user_repo.filter_query(phone=value)
+        if user_exists:
+            raise ValueError("phone cannot be used, try another")
+        return value    
+
+    @validator("document")
     def validate_phone_value(cls, value):
         """Validate phone."""
         if not validate_phone_number(value):

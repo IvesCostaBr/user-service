@@ -18,8 +18,9 @@ class UserService:
     def __init__(self) -> None:
         self.entity = "user"
 
-    def create(self, data: user.InUser, user_admin: dict = None):
+    def create(self, data: user.InUser, user_admin: dict = None, consumer_id: str = None):
         """Create user."""
+        tokens = {}
         data.password = encrypt_key(data.password)
         user_data = data.model_dump()
         user_data["is_admin"] = False
@@ -32,19 +33,24 @@ class UserService:
                 user_data.update(user_data.get("extra_data"))
                 user_data.pop("extra_data")
                 docid = f'{user_data.get("consumer")}|{user_data.get("user_id")}'
+                if consumer_id:
+                    user_data["consumer"] = consumer_id
+                    tokens = self.generate_unique_token(docid)
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={"error": "user already exists"},
                 )
-        elif user_admin:
+        elif user_admin or consumer_id:
             # validar se não existe outro usuario admin com o mesmo email, documento ou telefone.
             user_data["is_admin"] = True
-            user_data["consumers"] = [user_admin.get("consumer_id")]
-            user_data.pop("consumer_id")
+            user_data["consumers"] = [user_admin.get("consumer_id") if user_admin else consumer_id]
+            doc_id = user_repo.create(user_data, docid)   
+            tokens = self.generate_unique_token(doc_id)
+            return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
 
-        doc_id = user_repo.create(user_data, docid)
-        return {"detail": doc_id}
+        doc_id = user_repo.create(user_data, docid)    
+        return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
 
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
@@ -227,11 +233,15 @@ class UserService:
 
     def generate_unique_token(self, user: dict):
         """Generate unique token to user."""
-        tokens = generate_tokens(user, 4000)
-        result = login_token_repo.filter_query(user_id=user.get("id"), is_active=True)
+        if type(user) != str:
+            user_id = user.get("_id") if user.get("_id") else user.get("id")
+        else:
+            user_id = user
+        result = login_token_repo.filter_query(user_id=user_id, is_active=True)
         if result:
             for each in result:
                 login_token_repo.update(each.get("id"), {"is_active": False})
                 blacklist_repo.create({"access_token": each.get("token")})
-        login_token_repo.create({"user_id": user.get("id"), "token": tokens.get("access_token")})
+        tokens = generate_tokens(user, 4000)
+        login_token_repo.create({"user_id": user_id, "token": tokens.get("access_token")})
         return {"access_token": tokens.get("access_token")}
