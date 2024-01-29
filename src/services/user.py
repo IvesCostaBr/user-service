@@ -1,4 +1,4 @@
-from src.repositorys import user_repo, login_repo
+from src.repositorys import user_repo, login_repo, login_token_repo, blacklist_repo
 from src.models import user
 from starlette import status
 from fastapi import HTTPException
@@ -10,8 +10,7 @@ from src.utils.encrypt import (
     verify_otp,
 )
 from datetime import datetime
-from src.infra.grpc_clients import notifier_grpc_client, admin_grpc_client
-from src.infra.cache import cache_manager
+from src.infra.grpc_clients import notifier_grpc_client
 import json
 
 
@@ -46,21 +45,6 @@ class UserService:
 
         doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id}
-
-    def get_consumer(self, consumer_id: str):
-        """Get consumer by id."""
-        cached_data = cache_manager.get(id)
-        cached_data = None
-        if not cached_data:
-            result = admin_grpc_client.unary_call(
-                "GetConsumers", "FindConsumers", {"ids": [consumer_id]}
-            )
-            if not result:
-                return None
-            result = result.get("consumers")[0]
-            return result
-        else:
-            return cached_data
 
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
@@ -214,13 +198,13 @@ class UserService:
         consumer_id = user_admin.get("consumer_id")
         result = user_repo.filter_query(consumers__in=[consumer_id], is_admin=True)
         return {"data": result, "total": len(result)}
-    
+
     def get_super_admin(self):
         """List super admin."""
-        
+
         result = user_repo.filter_query(is_super_admin=True)
         return {"data": result, "total": len(result)}
-    
+
     def get_user(self, id: str, user_admin: dict):
         """Get user admin."""
         user = user_repo.get(id)
@@ -229,12 +213,25 @@ class UserService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"message": "user not found"},
             )
-        if user.get("is_admin") and user_admin.get("consumer_id") in user.get("consumers"):
+        if user.get("is_admin") and user_admin.get("consumer_id") in user.get(
+            "consumers"
+        ):
             return user
         elif user.get("is_super_admin") and user_admin.get("is_super_admin"):
             return user
-        
-        raise  HTTPException(
+
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"message": "user not found"},
         )
+
+    def generate_unique_token(self, user: dict):
+        """Generate unique token to user."""
+        tokens = generate_tokens(user, 4000)
+        result = login_token_repo.filter_query(user_id=user.get("id"), is_active=True)
+        if result:
+            for each in result:
+                login_token_repo.update(each.get("id"), {"is_active": False})
+                blacklist_repo.create({"access_token": each.get("token")})
+        login_token_repo.create({"user_id": user.get("id"), "token": tokens.get("access_token")})
+        return {"access_token": tokens.get("access_token")}

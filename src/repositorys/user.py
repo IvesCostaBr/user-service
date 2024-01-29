@@ -1,5 +1,7 @@
 from src.infra.db.abstract_conneection import AbstractConnection
 from src.infra.db import database
+from src.infra.grpc_clients import admin_grpc_client
+from src.infra.cache import cache_manager
 
 
 class UserRepository:
@@ -31,6 +33,8 @@ class UserRepository:
 
     def exists(self, **kwargs):
         """verify exists document."""
+        if self.entity == "users":
+            kwargs["is_admin"] = False
         result = self.db.exists(self.entity, kwargs)
         return result
 
@@ -40,3 +44,18 @@ class UserRepository:
         if result:
             return result.get("password")
         return result
+
+    def get_consumer(self, consumer_id: str):
+        """Get consumer by id."""
+        cached_data = cache_manager.get(id)
+        cached_data = None
+        if not cached_data:
+            result = admin_grpc_client.unary_call(
+                "GetConsumers", "FindConsumers", {"ids": [consumer_id]}
+            )
+            if not result:
+                return None
+            result = result.get("consumers")[0]
+            return result
+        else:
+            return cached_data

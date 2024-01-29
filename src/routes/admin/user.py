@@ -17,13 +17,16 @@ async def register_user_admin(data: user.InUser, user=Depends(verify_is_super_us
 async def register_user(data: user.InUserAdmin, user=Depends(verify_is_admin)):
     return user_service.create(data, user)
 
+
 @router.get("", status_code=status.HTTP_200_OK)
 async def get_users_admin(user=Depends(verify_is_admin)):
     return user_service.get_user_admin(user)
 
+
 @router.get("/super-admin", status_code=status.HTTP_200_OK)
 async def get_users_super_admin(user=Depends(verify_is_super_user)):
     return user_service.get_super_admin()
+
 
 @router.get("/{id}", status_code=status.HTTP_200_OK)
 async def get_user(id: str, user=Depends(verify_is_admin)):

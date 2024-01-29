@@ -90,7 +90,6 @@ class MongoConnection(AbstractConnection):
                 filter_formated.append({key.replace("__nt", ""): {"$not": value}})
         return filter_formated
 
-
     def filter_query(self, entity: str, query: dict):
         response_list = []
         formatted_query = self.__format_filter(query)
