@@ -49,3 +49,10 @@ async def verify_otp(otp: str, id: str):
 async def generete_unique_token(auth: dict = Depends(authenticate_user)):
     """Generate unique token to user."""
     return user_service.generate_unique_token(auth)
+
+@router.get("/validate-api-key", status_code=status.HTTP_200_OK)
+async def validate_api_key_route(consumer: str = Depends(verify_api_key), response_model=generic.SignUpUserResponse):
+    if consumer:
+        return {"detail": True}
+    else:
+        return {"detail": False}
