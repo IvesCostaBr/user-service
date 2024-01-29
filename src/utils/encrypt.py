@@ -32,15 +32,13 @@ def verify_key(input_key, stored_key):
 def generate_tokens(user_data: dict, days_expired_at: int = None):
     # Configuração do token de acesso
     if days_expired_at:
-        total_seconds = (
-            (datetime.utcnow() + timedelta(days=days_expired_at)) - datetime.now()
-        ).total_seconds()
         timestamp_access = timedelta(days=days_expired_at)
     else:
-        total_seconds = (
-            (datetime.utcnow() + timedelta(minutes=days_expired_at)) - datetime.now()
-        ).total_seconds()
         timestamp_access = timedelta(minutes=15)
+
+    total_seconds = (
+        (datetime.utcnow() + timestamp_access) - datetime.now()
+    ).total_seconds()
     user_id = user_data.get("_id") if user_data.get("_id") else user_data.get("id")
     if not user_id:
         return None

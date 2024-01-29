@@ -84,7 +84,7 @@ class UserService:
             )
         user = user[0]
         data.password = encrypt_key(data.password)
-        if data.password != user_repo.get_password(user.get("git adid")):
+        if data.password != user_repo.get_password(user.get("id")):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"error": "email or password incorrect."},
