@@ -50,7 +50,7 @@ def validate_token(token: str):
 
 def authenticate_user(
     token: str = Depends(id_token),
-    consumer: str = Header(alias="Consumer", convert_underscores=False),
+    consumer: str = Header(None, alias="Consumer", convert_underscores=False),
     x_api_key: str = Header(None, alias="x-api-key", convert_underscores=False),
 ):
     """Validate token"""
@@ -75,7 +75,7 @@ def verify_api_key(
     
 def verify_is_admin(
     token: str = Depends(id_token),
-    consumer: str = Header(alias="Consumer", convert_underscores=False),
+    consumer: str = Header(None, alias="Consumer", convert_underscores=False),
     x_api_key: str = Header(None, alias="x-api-key", convert_underscores=False)
 ):
     only_token = token.split("Bearer ")[1]
