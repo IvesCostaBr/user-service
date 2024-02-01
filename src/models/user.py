@@ -94,6 +94,7 @@ class LoginUser(BaseModel):
     document: str = None
     password: str = None
     passwordless: bool = False
+    consumer_id: str = None
 
     @root_validator(pre=True)
     def validate_passwordless(cls, field_values):

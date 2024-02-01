@@ -4,6 +4,8 @@ from fastapi import Depends
 from src.models import user, auth, generic
 from src.utils.auth import authenticate_user, verify_api_key
 from starlette import status
+from src.utils.encrypt import encrypt_key
+import os
 
 router = APIRouter(tags=["User"])
 
@@ -56,3 +58,8 @@ async def validate_api_key_route(consumer: str = Depends(verify_api_key), respon
         return {"detail": True}
     else:
         return {"detail": False}
+
+if os.environ.get("ENVIRONMENT") in ["DEV"]:
+    @router.get("encrypt")
+    async def encrypt(key):
+        return encrypt_key(key)

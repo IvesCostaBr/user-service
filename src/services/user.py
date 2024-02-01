@@ -74,53 +74,36 @@ class UserService:
     def recovery_password(self, email: str, code: str):
         return True
 
+    def __raise_http_error(status_code: int, msg: dict):
+        """Generate http error."""
+        raise HTTPException(
+            status_code=status_code,
+            detail=msg
+        )
+
     def login(self, data: user.LoginUser):
         """Login and generete token of user."""
+        query = {"consumer": data.consumer_id} if data.consumer_id else {}
         if data.email:
-            user = user_repo.filter_query(email=data.email)
+            query["email"] = data.email
         elif data.phone:
-            user = user_repo.filter_query(phone=data.phone)
+            query["phone"] = data.email
         elif data.document:
-            user = user_repo.filter_query(document=data.document)
-
+            query["document"] = data.email
+        else:
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "unauthorized"})
+    
+        user = user_repo.filter_query(**query)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": "unauthorized"},
-            )
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "unauthorized"})
         user = user[0]
         data.password = encrypt_key(data.password)
         if data.password != user_repo.get_password(user.get("id")):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": "email or password incorrect."},
-            )
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "incorrect credentials"})
         tokens = generate_tokens(user)
         if not tokens:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": "error generete new token"},
-            )
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "error generete new token"})
         return tokens
-
-    # def __verify_request_login_in_open(self, phone: str):
-    #     """Verify exists login otp in open."""
-    #     login_code = login_repo.filter_query(phone=phone, is_validated=False)
-    #     if login_code:
-    #         not_used = False
-    #         for each in login_code:
-    #             last_login = datetime.utcfromtimestamp(each.get("created_at"))
-    #             date_now = datetime.now()
-    #             diff_minutes = (date_now - last_login).total_seconds() / 60
-    #             if diff_minutes >= 5:
-    #                 login_repo.update(each.get("_id"), {"is_validated": True})
-    #             else:
-    #                 not_used = True
-    #         if not_used:
-    #             raise HTTPException(
-    #                 status_code=status.HTTP_400_BAD_REQUEST,
-    #                 detail={"error": "already exists code."},
-    #             )
 
     def login_passwordless(self, data: user.LoginUser):
         """Send login code with phone or email."""
