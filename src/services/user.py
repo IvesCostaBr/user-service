@@ -74,7 +74,7 @@ class UserService:
     def recovery_password(self, email: str, code: str):
         return True
 
-    def __raise_http_error(status_code: int, msg: dict):
+    def __raise_http_error(self, status_code: int, msg: dict):
         """Generate http error."""
         raise HTTPException(
             status_code=status_code,
@@ -84,12 +84,13 @@ class UserService:
     def login(self, data: user.LoginUser):
         """Login and generete token of user."""
         query = {"consumer": data.consumer_id} if data.consumer_id else {}
+        query["is_admin"] = data.is_admin
         if data.email:
             query["email"] = data.email
         elif data.phone:
-            query["phone"] = data.email
+            query["phone"] = data.phone
         elif data.document:
-            query["document"] = data.email
+            query["document"] = data.document
         else:
             self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "unauthorized"})
     
