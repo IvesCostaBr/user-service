@@ -9,12 +9,12 @@ router = APIRouter(tags=["Program Referal"])
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-async def register_user_admin(user=Depends(authenticate_user)):
+async def get_or_create_referal_code(user=Depends(authenticate_user)):
     return program_referal_service.create(user)
 
 
 @router.get("", status_code=status.HTTP_200_OK)
-async def register_user(user=Depends(authenticate_user)):
+async def get_refera_code_user(user=Depends(authenticate_user)):
     return program_referal_service.get_user_referal_code(user)
 
 
