@@ -61,4 +61,4 @@ class ProgramReferalService:
                 result = True
             else:
                 result = False
-        return {"valid": result}
+        return {"valid": result, "name": user_code.get('name')}
