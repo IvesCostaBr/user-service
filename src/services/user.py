@@ -1,4 +1,10 @@
-from src.repositorys import user_repo, login_repo, login_token_repo, blacklist_repo
+from src.repositorys import (
+    user_repo,
+    login_repo,
+    login_token_repo,
+    blacklist_repo,
+    program_referal_repo
+)
 from src.models import user
 from starlette import status
 from fastapi import HTTPException
@@ -11,12 +17,14 @@ from src.utils.encrypt import (
 )
 from datetime import datetime
 from src.infra.grpc_clients import notifier_grpc_client
+from src.utils.helper import remove_special_character
 import json
 
 
 class UserService:
     def __init__(self) -> None:
         self.entity = "user"
+        self.program_referal = program_referal_repo
 
     def create(self, data: user.InUser, user_admin: dict = None, consumer_id: str = None):
         """Create user."""
@@ -31,6 +39,9 @@ class UserService:
             )
             if not user_exists:
                 user_data.update(user_data.get("extra_data"))
+                document = user_data.get('document')
+                if document:
+                    user_data["document"] = remove_special_character(document)
                 user_data.pop("extra_data")
                 docid = f'{user_data.get("consumer")}|{user_data.get("user_id")}'
                 if consumer_id:
@@ -44,12 +55,15 @@ class UserService:
         elif user_admin or consumer_id:
             # validar se não existe outro usuario admin com o mesmo email, documento ou telefone.
             user_data["is_admin"] = True
-            user_data["consumers"] = [user_admin.get("consumer_id") if user_admin else consumer_id]
-            doc_id = user_repo.create(user_data, docid)   
+            user_data["consumers"] = [user_admin.get(
+                "consumer_id") if user_admin else consumer_id]
+            doc_id = user_repo.create(user_data, docid)
             tokens = self.generate_unique_token(doc_id)
             return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
 
-        doc_id = user_repo.create(user_data, docid)    
+        user_data["referal_code"] = self.program_referal.create(
+            {"user_id": doc_id})
+        doc_id = user_repo.create(user_data, docid)
         return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
 
     def create_admin(self, data: user.InUserAdmin):
@@ -92,18 +106,22 @@ class UserService:
         elif data.document:
             query["document"] = data.document
         else:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "unauthorized"})
-    
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                                    "error": "unauthorized"})
+
         user = user_repo.filter_query(**query)
         if not user:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "unauthorized"})
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                                    "error": "unauthorized"})
         user = user[0]
         data.password = encrypt_key(data.password)
         if data.password != user_repo.get_password(user.get("id")):
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "incorrect credentials"})
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                                    "error": "incorrect credentials"})
         tokens = generate_tokens(user)
         if not tokens:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {"error": "error generete new token"})
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                                    "error": "error generete new token"})
         return tokens
 
     def login_passwordless(self, data: user.LoginUser):
@@ -186,7 +204,8 @@ class UserService:
     def get_user_admin(self, user_admin: dict):
         """List user admin."""
         consumer_id = user_admin.get("consumer_id")
-        result = user_repo.filter_query(consumers__in=[consumer_id], is_admin=True)
+        result = user_repo.filter_query(
+            consumers__in=[consumer_id], is_admin=True)
         return {"data": result, "total": len(result)}
 
     def get_super_admin(self):
@@ -227,5 +246,6 @@ class UserService:
                 login_token_repo.update(each.get("id"), {"is_active": False})
                 blacklist_repo.create({"access_token": each.get("token")})
         tokens = generate_tokens(user, 4000)
-        login_token_repo.create({"user_id": user_id, "token": tokens.get("access_token")})
+        login_token_repo.create(
+            {"user_id": user_id, "token": tokens.get("access_token")})
         return {"access_token": tokens.get("access_token")}

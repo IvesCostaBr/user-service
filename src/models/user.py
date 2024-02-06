@@ -41,7 +41,8 @@ class InUser(BaseModel):
             if value.get("consumer") and value.get("user_id"):
                 return value
             else:
-                raise ValueError("this keys 'consumer' and 'user_id' is required in extra_data.")
+                raise ValueError(
+                    "this keys 'consumer' and 'user_id' is required in extra_data.")
         return value
 
     @validator("email")
@@ -62,10 +63,10 @@ class InUser(BaseModel):
         user_exists = user_repo.filter_query(phone=value)
         if user_exists:
             raise ValueError("phone cannot be used, try another")
-        return value    
+        return value
 
     @validator("document")
-    def validate_phone_value(cls, value):
+    def validate_documente_value(cls, value):
         """Validate phone."""
         if not validate_phone_number(value):
             raise ValueError("Invalid phone.")
