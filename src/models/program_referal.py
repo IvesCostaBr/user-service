@@ -15,3 +15,4 @@ class OutValidateCode(BaseModel):
     """Response of vaidate code"""
 
     valid: bool
+    name: str = None
