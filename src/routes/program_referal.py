@@ -3,7 +3,7 @@ from src.services import program_referal_service
 from fastapi import Depends
 from starlette import status
 from src.models.program_referal import OutValidateCode
-from src.utils.auth import authenticate_user
+from src.utils.auth import authenticate_user, verify_api_key
 
 router = APIRouter(tags=["Program Referal"])
 
@@ -25,6 +25,6 @@ async def get_refera_code_user(user=Depends(authenticate_user)):
     }
 }
 )
-async def validate_code(code: str, user=Depends(authenticate_user)):
+async def validate_code(code: str, auth=Depends(verify_api_key)):
     """Validate code referal of user."""
-    return program_referal_service.validate_code(user, code)
+    return program_referal_service.validate_code(auth, code)

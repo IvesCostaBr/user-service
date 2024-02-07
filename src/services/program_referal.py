@@ -31,7 +31,7 @@ class ProgramReferalService:
             detail={"error": "not found referal code"}
         )
 
-    def validate_code(self, user: dict, code: str):
+    def validate_code(self, consumer_id: str, code: str):
         """Validate code referal."""
         user_code = program_referal_repo.filter_query(
             code=code,
@@ -49,15 +49,9 @@ class ProgramReferalService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={"error": "user not found"}
             )
-            result = False
         result = False
-        if not user.get('is_admin') and user.get('consumer_id'):
-            if user_data.get('consumer') == user.get('consumer_id'):
-                result = True
-            else:
-                result = False
-        elif user.get('is_admin'):
-            if user.get('consumer_id') == user_code.get('consumer'):
+        if consumer_id:
+            if user_data.get('consumer') == consumer_id:
                 result = True
             else:
                 result = False
