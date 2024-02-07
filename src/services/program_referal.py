@@ -18,6 +18,10 @@ class ProgramReferalService:
     def get(self, code: str):
         """"""
 
+    def get_all_user_invited(self, user: dict, user_id: str):
+        """Get all user invited."""
+        return []
+
     def get_user_referal_code(self, user: dict):
         """Get referal code of user."""
         result = program_referal_repo.filter_query(
