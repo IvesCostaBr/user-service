@@ -57,14 +57,14 @@ class UserService:
             user_data["is_admin"] = True
             user_data["consumers"] = [user_admin.get(
                 "consumer_id") if user_admin else consumer_id]
-            doc_id = user_repo.create(user_data, docid)
-            tokens = self.generate_unique_token(doc_id)
-            return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
+            docid = user_repo.create(user_data, docid)
+            tokens = self.generate_unique_token(docid)
+            return {"detail": docid, "access_token": tokens.get("access_token", '')}
 
         user_data["referal_code"] = self.program_referal.create(
-            {"user_id": doc_id})
-        doc_id = user_repo.create(user_data, docid)
-        return {"detail": doc_id, "access_token": tokens.get("access_token", '')}
+            **{"user_id": docid})
+        docid = user_repo.create(user_data, docid)
+        return {"detail": docid, "access_token": tokens.get("access_token", '')}
 
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
