@@ -13,7 +13,6 @@
                 "main_api:app",
                 "--port",
                 "7000",
-                "--reload"
             ],
             "jinja": true,
             "justMyCode": true

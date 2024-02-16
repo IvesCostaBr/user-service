@@ -16,6 +16,7 @@ def raised_unauthorized(msg: str = None):
         detail=msg,
     )
 
+
 def validate_api_key(api_key: str, token: str = None, consumer: str = None):
     """Validate consumer and api_key."""
     user = True
@@ -35,8 +36,9 @@ def validate_token(token: str):
     if not result:
         raised_unauthorized()
     user = user_repo.get(payload.get("sub"))
-    logging.error(f"user not found {payload.get('sub')}")
+
     if not user:
+        logging.error(f"user not found {payload.get('sub')}")
         raised_unauthorized()
     user["consumer_id"] = user.get("consumer")
     if user.get("consumers") and not user.get("consumer_id"):
@@ -51,7 +53,8 @@ def validate_token(token: str):
 def authenticate_user(
     token: str = Depends(id_token),
     consumer: str = Header(None, alias="Consumer", convert_underscores=False),
-    x_api_key: str = Header(None, alias="x-api-key", convert_underscores=False),
+    x_api_key: str = Header(None, alias="x-api-key",
+                            convert_underscores=False),
 ):
     """Validate token"""
     only_token = token.split("Bearer ")[1]
@@ -64,7 +67,8 @@ def authenticate_user(
 
 
 def verify_api_key(
-    x_api_key: str = Header(None, alias="x-api-key", convert_underscores=False),
+    x_api_key: str = Header(None, alias="x-api-key",
+                            convert_underscores=False),
     consumer: str = Header(None, alias="Consumer", convert_underscores=False),
 ):
     """Verify api key."""
@@ -72,7 +76,8 @@ def verify_api_key(
         validate_api_key(x_api_key, consumer=consumer)
         return consumer
     return None
-    
+
+
 def verify_is_admin(
     token: str = Depends(id_token),
     consumer: str = Header(None, alias="Consumer", convert_underscores=False),
@@ -92,7 +97,8 @@ def verify_is_admin(
 
 def verify_is_super_user(
     token: str = Depends(id_token),
-    x_api_key: str = Header(None, alias="x-api-key", convert_underscores=False),
+    x_api_key: str = Header(None, alias="x-api-key",
+                            convert_underscores=False),
 ):
     """Validate token"""
     only_token = token.split("Bearer ")[1]

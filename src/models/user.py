@@ -33,6 +33,7 @@ class InUser(BaseModel):
     document: str = None
     phone: str = None
     extra_data: dict = None
+    referal_id: str = None
 
     @validator("extra_data")
     def validate_extra_data(cls, value):

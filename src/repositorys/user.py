@@ -26,6 +26,11 @@ class UserRepository:
         result = self.db.get_all(self.entity)
         return result
 
+    def update(self, id: str, data: dict):
+        """Update user."""
+        result = self.db.update(self.entity, id, data)
+        return result
+
     def filter_query(self, **query):
         """Filter query"""
         result = self.db.filter_query(self.entity, query)

@@ -1,7 +1,12 @@
-from dotenv import load_dotenv
-import os
-
 # load env vars from secret manager
+import os
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, responses, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
+from src.routes.admin import user as admin_user
+from src.routes import user, program_referal
+from src.routes.admin import rate, program_referal as program_referal_admin
 if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
     from src.utils.secrets import start_secret_env
 
@@ -11,11 +16,6 @@ if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
         raise Exception("Error to load env config.")
 load_dotenv()
 
-from fastapi import FastAPI, Request, responses, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
-from src.routes.admin import user as admin_user
-from src.routes import user, program_referal
 
 app = FastAPI(
     title="Auth API",
@@ -37,6 +37,9 @@ app.add_middleware(
 app.include_router(user.router, prefix="/api/user")
 app.include_router(admin_user.router, prefix="/api/admin/user")
 app.include_router(program_referal.router, prefix="/api/referal")
+app.include_router(rate.router, prefix="/api/admin/rate")
+app.include_router(program_referal_admin.router, prefix="/api/admin/referal")
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -71,7 +74,8 @@ def custom_openapi():
     }
     for route in openapi_schema["paths"]:
         for method in openapi_schema["paths"][route]:
-            openapi_schema["paths"][route][method]["security"] = [{"FirebaseAuth": []}]
+            openapi_schema["paths"][route][method]["security"] = [
+                {"FirebaseAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

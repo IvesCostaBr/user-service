@@ -3,9 +3,10 @@ from src.repositorys import (
     login_repo,
     login_token_repo,
     blacklist_repo,
-    program_referal_repo
+    program_referal_repo,
+    rate_repo
 )
-from src.models import user
+from src.models import user, program_referal as program_referal_model
 from starlette import status
 from fastapi import HTTPException
 from src.utils.encrypt import (
@@ -20,11 +21,13 @@ from src.infra.grpc_clients import notifier_grpc_client
 from src.utils.helper import remove_special_character
 import json
 
+from src.services import program_referal_service
+
 
 class UserService:
     def __init__(self) -> None:
         self.entity = "user"
-        self.program_referal = program_referal_repo
+        self.program_referal_service = program_referal_service
 
     def create(self, data: user.InUser, user_admin: dict = None, consumer_id: str = None):
         """Create user."""
@@ -61,10 +64,33 @@ class UserService:
             tokens = self.generate_unique_token(docid)
             return {"detail": docid, "access_token": tokens.get("access_token", '')}
 
-        user_data["referal_code"] = self.program_referal.create(
-            **{"user_id": docid})
+        # create referal code
+        user_data["invitation_id"] = data.referal_id
         docid = user_repo.create(user_data, docid)
+        user_data["id"] = docid
+        self.__create_referal_code(user_data)
         return {"detail": docid, "access_token": tokens.get("access_token", '')}
+
+    def __create_referal_code(self, user: dict):
+        """Create referal code and rate."""
+        try:
+            consumer_id = user.get('consumer') or user.get('consumer_id')
+            consumer_rate = rate_repo.filter_query(
+                consumer_id=consumer_id, is_default=True
+            )
+            if consumer_rate:
+                consumer_rate = consumer_rate[0]
+            else:
+                consumer_rate = {}
+            payload = program_referal_model.InProgramReferal(
+                user_id=user.get("id"),
+                consumer_id=consumer_id,
+                rate_id=consumer_rate.get('id')
+            )
+            self.program_referal_service.create(user, payload)
+        except Exception as ex:
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                "error": "error in create referal code.", "description": str(ex)})
 
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
@@ -106,21 +132,21 @@ class UserService:
         elif data.document:
             query["document"] = data.document
         else:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+            self.__raise_http_error(status.HTTP_401_UNAUTHORIZED, {
                                     "error": "unauthorized"})
 
         user = user_repo.filter_query(**query)
         if not user:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+            self.__raise_http_error(status.HTTP_401_UNAUTHORIZED, {
                                     "error": "unauthorized"})
         user = user[0]
         data.password = encrypt_key(data.password)
         if data.password != user_repo.get_password(user.get("id")):
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+            self.__raise_http_error(status.HTTP_401_UNAUTHORIZED, {
                                     "error": "incorrect credentials"})
         tokens = generate_tokens(user)
         if not tokens:
-            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+            self.__raise_http_error(status.HTTP_401_UNAUTHORIZED, {
                                     "error": "error generete new token"})
         return tokens
 
