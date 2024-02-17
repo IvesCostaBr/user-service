@@ -1,12 +1,5 @@
 # load env vars from secret manager
-import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, responses, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
-from src.routes.admin import user as admin_user
-from src.routes import user, program_referal
-from src.routes.admin import rate, program_referal as program_referal_admin
 if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
     from src.utils.secrets import start_secret_env
 
@@ -15,6 +8,16 @@ if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
     else:
         raise Exception("Error to load env config.")
 load_dotenv()
+
+
+
+import os
+from fastapi import FastAPI, Request, responses, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
+from src.routes.admin import user as admin_user
+from src.routes import user, program_referal
+from src.routes.admin import rate, program_referal as program_referal_admin
 
 
 app = FastAPI(
