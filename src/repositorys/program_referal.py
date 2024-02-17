@@ -22,7 +22,7 @@ class ProgramReferalRepository:
         """Get card by id"""
         result = self.db.get(self.entity, id)
         if result:
-            result["rate"] = self.db.get("rates", result.get("rate_id"))
+            result["rate"] = self.db.get("rates", result.get("rate_id"), False)
         return result
 
     def get_all(self):
