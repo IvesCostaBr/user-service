@@ -15,7 +15,7 @@ class ProgramReferalService:
             consumer_id=consumer_id, is_default=True
         )
         if consumer_rate:
-            consumer_rate = consumer_rate[0]
+            return consumer_rate[0].get('id')
         raise Exception(
             "error in create new referal code, rate default not found")
 
