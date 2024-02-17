@@ -1,5 +1,7 @@
 # load env vars from secret manager
 from dotenv import load_dotenv
+import os
+
 if os.environ.get("DEPLOY") and bool(int(os.environ.get("DEPLOY"))):
     from src.utils.secrets import start_secret_env
 
@@ -11,7 +13,6 @@ load_dotenv()
 
 
 
-import os
 from fastapi import FastAPI, Request, responses, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
