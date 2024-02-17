@@ -1,5 +1,5 @@
 from fastapi.routing import APIRouter
-from src.services import user_service
+from src.services import user_service, program_referal_service
 from fastapi import Depends
 from src.models import user, auth, generic
 from src.utils.auth import authenticate_user, verify_api_key
@@ -29,11 +29,14 @@ async def refresh_token_user(refresh_token: str):
 
 @router.get(
     "/me",
-    responses={200: {"model": user.OutUser, "description": "Return data of user"}},
+    responses={200: {"model": user.OutUser,
+                     "description": "Return data of user"}},
     response_model=dict,
     status_code=status.HTTP_200_OK,
 )
 async def get_user_data(user: dict = Depends(authenticate_user)):
+    rates = program_referal_service.get_referals_data(user)
+    user["rates"] = rates
     return user
 
 
@@ -51,6 +54,7 @@ async def verify_otp(otp: str, id: str):
 async def generete_unique_token(auth: dict = Depends(authenticate_user)):
     """Generate unique token to user."""
     return user_service.generate_unique_token(auth)
+
 
 @router.get("/validate-api-key", status_code=status.HTTP_200_OK)
 async def validate_api_key_route(consumer: str = Depends(verify_api_key), response_model=generic.SignUpUserResponse):
