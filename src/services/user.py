@@ -3,7 +3,6 @@ from src.repositorys import (
     login_repo,
     login_token_repo,
     blacklist_repo,
-    program_referal_repo,
     rate_repo
 )
 from src.models import user, program_referal as program_referal_model
@@ -18,7 +17,7 @@ from src.utils.encrypt import (
 )
 from datetime import datetime
 from src.infra.grpc_clients import notifier_grpc_client
-from src.utils.helper import remove_special_character
+from src.utils.helper import clear_value, remove_special_character
 import json
 
 from src.services import program_referal_service
@@ -128,9 +127,9 @@ class UserService:
         if data.email:
             query["email"] = data.email
         elif data.phone:
-            query["phone"] = data.phone
+            query["phone"] = clear_value(data.phone)
         elif data.document:
-            query["document"] = data.document
+            query["document"] = clear_value(data.document)
         else:
             self.__raise_http_error(status.HTTP_401_UNAUTHORIZED, {
                                     "error": "unauthorized"})
