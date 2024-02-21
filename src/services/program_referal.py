@@ -53,8 +53,8 @@ class ProgramReferalService:
             return
         else:
             default_referal = default_referal[0]
-            rates["main"] = {default_referal.get('user_id'): rate_repo.get(
-                default_referal.get('rate_id'))}
+            rates["main"] = rate_repo.get(default_referal.get('rate_id'))
+            rates["main"]["user_id"] = default_referal.get('user_id')
         rates["users"] = {}
         referal = program_referal_repo.get(user.get('invitation_id'))
         if not referal:
