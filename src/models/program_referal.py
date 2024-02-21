@@ -11,7 +11,7 @@ class InProgramReferal(BaseModel):
     name: str = generate_unique_random_string(10)
     consumer_id: str = None
     rate_id: str
-    is_active: bool = True
+    principal: bool = False
     expired_at: datetime = None
 
     @validator("rate_id")

@@ -29,7 +29,6 @@ class InRate(BaseModel):
 
     values: List[RateType] = None
     name: str = None
-    is_default: bool = True
 
 
 class UpdateRate(BaseModel):
