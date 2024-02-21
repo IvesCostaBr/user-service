@@ -46,15 +46,16 @@ class ProgramReferalService:
 
     def get_referals_data(self, user: dict):
         """"""
+        rates = {}
         default_referal = program_referal_repo.filter_query(
             consumer_id=user.get('consumer'), principal=True)
         if not default_referal:
             return
         else:
             default_referal = default_referal[0]
-            default_referal["rate"] = rate_repo.get(
-                default_referal.get('rate_id'))
-        rates = {"main": default_referal, "users": {}}
+            rates["main"] = {default_referal.get('user_id'): rate_repo.get(
+                default_referal.get('rate_id'))}
+        rates["users"] = {}
         referal = program_referal_repo.get(user.get('invitation_id'))
         if not referal:
             return rates
