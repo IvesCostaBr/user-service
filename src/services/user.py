@@ -80,7 +80,7 @@ class UserService:
             if consumer_rate:
                 consumer_rate = consumer_rate[0]
             else:
-                consumer_rate = {}
+                return None
             payload = program_referal_model.InProgramReferal(
                 user_id=user.get("id"),
                 consumer_id=consumer_id,
