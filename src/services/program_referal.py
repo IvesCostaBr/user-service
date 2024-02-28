@@ -125,11 +125,10 @@ class ProgramReferalService:
             user_data = user_repo.get(user_code.get('user_id'))
             if not user_data:
                 raise Exception("user not found")
-            result = False
             if consumer_id:
                 if not user_data.get('consumer') == consumer_id:
                     raise Exception("291 - referal code not available")
-            return {"valid": result, "referal_id": user_code.get('id')}
+            return {"valid": True, "referal_id": user_code.get('id')}
         except Exception as ex:
             if type(ex) == HTTPException:
                 raise ex
