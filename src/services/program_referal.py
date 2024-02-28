@@ -98,12 +98,8 @@ class ProgramReferalService:
             user_id=user.get('id'),
             consumer_id=user.get("consumer")
         )
-        if result:
-            return result
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "not found referal code"}
-        )
+
+        return {"data": result, "total": len(result)}
 
     def validate_code(self, consumer_id: str, code: str):
         """Validate code referal."""
