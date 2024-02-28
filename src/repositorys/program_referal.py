@@ -15,6 +15,7 @@ class ProgramReferalRepository:
         if is_exists:
             return is_exists[0].get('id')
 
+        kwargs["name"] = kwargs["name"].lower()
         docid = self.db.create(self.entity, kwargs)
         return docid
 

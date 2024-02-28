@@ -109,7 +109,7 @@ class ProgramReferalService:
         """Validate code referal."""
         try:
             user_code = program_referal_repo.filter_query(
-                name=code,
+                name=code.lower(),
                 consumer_id=consumer_id,
                 is_active=True
             )
@@ -130,9 +130,4 @@ class ProgramReferalService:
                     raise Exception("291 - referal code not available")
             return {"valid": True, "referal_id": user_code.get('id')}
         except Exception as ex:
-            if type(ex) == HTTPException:
-                raise ex
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error": str(ex)}
-            )
+            return {"valid": False, "referal_id": None}
