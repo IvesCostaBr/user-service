@@ -4,8 +4,9 @@ from typing import List
 
 class RateValue(BaseModel):
     """Model of rate values."""
-    dynamic_value: float = None
-    fix_value: float = None
+    dynamic_value: float = 0
+    minimun_dynamic_value: float = 0
+    fix_value: float = 0
 
 
 class RateType(BaseModel):
