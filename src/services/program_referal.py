@@ -9,6 +9,10 @@ class ProgramReferalService:
     def __init__(self) -> None:
         self.entity = "program_referal"
 
+    def update(self, user: dict, id: str):
+        """Update referal code data."""
+        return []
+
     def __get_rate_consumer_default(self, consumer_id: str):
         """Get rate default of consumer."""
         consumer_rate = rate_repo.filter_query(

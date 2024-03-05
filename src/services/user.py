@@ -91,6 +91,14 @@ class UserService:
             self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
                 "error": "error in create referal code.", "description": str(ex)})
 
+    def validate_password(self, user: dict, password: str):
+        """Validate password."""
+        password = encrypt_key(password)
+        if password != user_repo.get_password(user.get("id")):
+            self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
+                "error": "incorrect credentials"})
+        return {"detail": True}
+
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
         data.password = encrypt_key(data.password)

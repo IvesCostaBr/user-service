@@ -67,3 +67,9 @@ if os.environ.get("ENVIRONMENT") in ["DEV"]:
     @router.get("encrypt")
     async def encrypt(key):
         return encrypt_key(key)
+
+
+@router.get("/validate-password", status_code=status.HTTP_200_OK)
+async def validate_user_password(password: str, auth: dict = Depends(authenticate_user)):
+    """Validate password user."""
+    return user_service.validate_password(auth, password)
