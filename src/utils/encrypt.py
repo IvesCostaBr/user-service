@@ -2,11 +2,58 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import datetime, timedelta
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-from src.repositorys import blacklist_repo, login_token_repo
-import base64, os, jwt, pyotp, logging
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
+from src.repositorys import blacklist_repo
+import base64
+import os
+import jwt
+import pyotp
+import logging
 
+CYPHER_KEY = os.environ.get('CYPHER_KEY')
 SECRET_KEY = os.environ.get("SECRET_KEY")
 totp = pyotp.TOTP("base32secret3232", interval=900)
+
+
+def encrypt_cypher(plaintext):
+    backend = default_backend()
+
+    # Adiciona padding ao texto
+    padder = padding.PKCS7(128).padder()
+    padded_plaintext = padder.update(plaintext.encode()) + padder.finalize()
+
+    # Cria um objeto Cipher para criptografar com AES em modo CBC
+    cipher = Cipher(algorithms.AES(CYPHER_KEY), backend=backend)
+    encryptor = cipher.encryptor()
+
+    # Criptografa o texto
+    ciphertext = encryptor.update(padded_plaintext) + encryptor.finalize()
+
+    # Retorna o texto criptografado em base64
+    return base64.b64encode(ciphertext).decode()
+
+
+def decrypt_cypher(ciphertext):
+    backend = default_backend()
+
+    # Decodifica o texto criptografado
+    ciphertext = base64.b64decode(ciphertext)
+
+    # Cria um objeto Cipher para descriptografar com AES em modo CBC
+    cipher = Cipher(algorithms.AES(CYPHER_KEY), backend=backend)
+    decryptor = cipher.decryptor()
+
+    # Descriptografa o texto
+    padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+
+    # Remove o padding
+    unpadder = padding.PKCS7(128).unpadder()
+    plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+
+    # Retorna o texto descriptografado
+    return plaintext.decode()
 
 
 def encrypt_key(key):
@@ -40,7 +87,8 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
         (datetime.utcnow() + timestamp_access) - datetime.now()
     ).total_seconds()
     if type(user_data) != str:
-        user_id = user_data.get("_id") if user_data.get("_id") else user_data.get("id")
+        user_id = user_data.get("_id") if user_data.get(
+            "_id") else user_data.get("id")
     else:
         user_id = user_data
 
@@ -54,7 +102,8 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
         "nbf": datetime.utcnow(),
     }
 
-    access_token = jwt.encode(access_token_payload, SECRET_KEY, algorithm="HS256")
+    access_token = jwt.encode(access_token_payload,
+                              SECRET_KEY, algorithm="HS256")
 
     refresh_token_payload = {
         "sub": user_id,
@@ -63,7 +112,8 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
         "nbf": datetime.utcnow(),
     }
 
-    refresh_token = jwt.encode(refresh_token_payload, SECRET_KEY, algorithm="HS256")
+    refresh_token = jwt.encode(
+        refresh_token_payload, SECRET_KEY, algorithm="HS256")
 
     return {
         "access_token": access_token,
@@ -75,10 +125,12 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
 
 def validate_access_token(access_token):
     try:
-        blacklist_token = blacklist_repo.filter_query(access_token=access_token)
+        blacklist_token = blacklist_repo.filter_query(
+            access_token=access_token)
         if blacklist_token:
             return False, None
-        decoded_token = jwt.decode(access_token, SECRET_KEY, algorithms=["HS256"])
+        decoded_token = jwt.decode(
+            access_token, SECRET_KEY, algorithms=["HS256"])
         if datetime.utcnow() < datetime.utcfromtimestamp(decoded_token["exp"]):
             return True, decoded_token
     except Exception as ex:
@@ -88,8 +140,10 @@ def validate_access_token(access_token):
 
 def validate_refresh_token(refresh_token):
     try:
-        found_refresh_token = blacklist_repo.filter_query(refresh_token=refresh_token)
-        decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+        found_refresh_token = blacklist_repo.filter_query(
+            refresh_token=refresh_token)
+        decoded_token = jwt.decode(
+            refresh_token, SECRET_KEY, algorithms=["HS256"])
         total_seconds = (
             (datetime.utcnow() + timedelta(minutes=15)) - datetime.now()
         ).total_seconds()

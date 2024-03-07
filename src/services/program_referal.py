@@ -102,6 +102,16 @@ class ProgramReferalService:
             user_id=user.get('id'),
             consumer_id=user.get("consumer")
         )
+        if not result:
+            data = self.create(user, program_referal.InProgramReferal(
+                consumer_id=user.get("consumer"),
+                user_id=user.get('id'),
+            ))
+
+            result = [{
+                "id": data.get("detail"),
+                "name": data.get("name")
+            }]
 
         return {"data": result, "total": len(result)}
 

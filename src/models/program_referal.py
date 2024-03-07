@@ -7,10 +7,10 @@ from src.repositorys import rate_repo
 class InProgramReferal(BaseModel):
     """Program referal."""
 
-    user_id: str = None
+    user_id: str
     name: str = generate_unique_random_string(10)
     consumer_id: str = None
-    rate_id: str
+    rate_id: str = None
     principal: bool = False
     expired_at: datetime = None
 
