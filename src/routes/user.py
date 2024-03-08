@@ -69,7 +69,11 @@ if os.environ.get("ENVIRONMENT") in ["DEV"]:
         return encrypt_key(key)
 
 
-@router.get("/validate-password", status_code=status.HTTP_200_OK)
-async def validate_user_password(password: str, auth: dict = Depends(authenticate_user)):
+@router.post("/validate-password", status_code=status.HTTP_201_CREATED, responses={
+    status.HTTP_201_CREATED: {
+        "model": generic.PostGeneric
+    }
+})
+async def validate_user_password(data: user.ValidatePassword, auth: dict = Depends(authenticate_user)):
     """Validate password user."""
-    return user_service.validate_password(auth, password)
+    return user_service.validate_password(auth, data)

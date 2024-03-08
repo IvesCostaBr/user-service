@@ -1,10 +1,11 @@
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import datetime, timedelta
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives import serialization, hashes, padding
+from cryptography.hazmat.primitives.asymmetric import padding as asy_padding
+
 from src.repositorys import blacklist_repo
 import base64
 import os
@@ -12,57 +13,71 @@ import jwt
 import pyotp
 import logging
 
-CYPHER_KEY = os.environ.get('CYPHER_KEY')
+from src.utils import FILES
+
+P_KEY = FILES.get('private-key')
+PC_KEY = FILES.get('public-key')
 SECRET_KEY = os.environ.get("SECRET_KEY")
 totp = pyotp.TOTP("base32secret3232", interval=900)
 
 
-def encrypt_cypher(plaintext):
-    backend = default_backend()
+def rsa_decrypt(plaintext: str):
+    """RAS decrypt."""
+    try:
+        private_key_str = "-----BEGIN PRIVATE KEY-----\n" + \
+            P_KEY + "\n-----END PRIVATE KEY-----"
 
-    # Adiciona padding ao texto
-    padder = padding.PKCS7(128).padder()
-    padded_plaintext = padder.update(plaintext.encode()) + padder.finalize()
+        private_key = serialization.load_pem_private_key(
+            private_key_str.encode("utf-8"),
+            password=None,
+            backend=default_backend()
+        )
 
-    # Cria um objeto Cipher para criptografar com AES em modo CBC
-    cipher = Cipher(algorithms.AES(CYPHER_KEY), backend=backend)
-    encryptor = cipher.encryptor()
-
-    # Criptografa o texto
-    ciphertext = encryptor.update(padded_plaintext) + encryptor.finalize()
-
-    # Retorna o texto criptografado em base64
-    return base64.b64encode(ciphertext).decode()
-
-
-def decrypt_cypher(ciphertext):
-    backend = default_backend()
-
-    # Decodifica o texto criptografado
-    ciphertext = base64.b64decode(ciphertext)
-
-    # Cria um objeto Cipher para descriptografar com AES em modo CBC
-    cipher = Cipher(algorithms.AES(CYPHER_KEY), backend=backend)
-    decryptor = cipher.decryptor()
-
-    # Descriptografa o texto
-    padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-
-    # Remove o padding
-    unpadder = padding.PKCS7(128).unpadder()
-    plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
-
-    # Retorna o texto descriptografado
-    return plaintext.decode()
+        plaintext = private_key.decrypt(
+            bytes.fromhex(plaintext),
+            asy_padding.OAEP(
+                mgf=asy_padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        ).decode("utf-8")
+        return plaintext
+    except Exception as ex:
+        raise ex
 
 
-def encrypt_key(key):
-    secret_key_bytes = SECRET_KEY.encode("utf-8")
+def rsa_encrypt(plaintext: str):
+    """RSA encrypt."""
+    public_key = "-----BEGIN PUBLIC KEY-----\n" + \
+        PC_KEY + "\n-----END PUBLIC KEY-----"
+
+    try:
+        public_key_obj = serialization.load_pem_public_key(
+            public_key.encode("utf-8"),
+            backend=default_backend()
+        )
+        ciphertext = public_key_obj.encrypt(
+            plaintext.encode("utf-8"),
+            asy_padding.OAEP(
+                mgf=asy_padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return ciphertext.hex()
+    except Exception as ex:
+        raise ex
+
+
+def encrypt_key(key, secret: str = None):
+    if not secret:
+        secret = SECRET_KEY
+    secret = secret.encode("utf-8")
 
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         iterations=100000,
-        salt=secret_key_bytes,
+        salt=secret,
         length=32,
         backend=default_backend(),
     )

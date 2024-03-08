@@ -30,18 +30,14 @@ def access_secret_version(project_id, project_environ, version_id="latest"):
     return secret_data
 
 
-# def get_all_crts_and_keys():
-#     """Save files of credential in dict memory."""
-#     files_required = [
-#         "bnk-crt",
-#         "bnk-key",
-#         "frb-csr",
-#         "frb-key",
-#         "cred-uoleti",
-#         "cred-project-x",
-#     ]
-#     files = {}
-#     for file in files_required:
-#         secret = access_secret_version("uoleti-staging", file)
-#         files[file] = secret
-#     return files
+def get_all_crts_and_keys():
+    """Save files of credential in dict memory."""
+    files_required = [
+        "private-key",
+        "public-key",
+    ]
+    files = {}
+    for file in files_required:
+        secret = access_secret_version("uoleti-staging", file)
+        files[file] = secret
+    return files

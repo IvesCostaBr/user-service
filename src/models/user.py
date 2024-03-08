@@ -116,3 +116,9 @@ class LoginUser(BaseModel):
                 return field_values
             else:
                 raise ValueError("Email and password are required for login.")
+
+
+class ValidatePassword(BaseModel):
+    """Validate password model."""
+
+    key: str

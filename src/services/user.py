@@ -3,7 +3,8 @@ from src.repositorys import (
     login_repo,
     login_token_repo,
     blacklist_repo,
-    rate_repo
+    rate_repo,
+    validate_key_repo
 )
 from src.models import user, program_referal as program_referal_model
 from starlette import status
@@ -14,11 +15,14 @@ from src.utils.encrypt import (
     validate_refresh_token,
     generate_otp,
     verify_otp,
+    rsa_decrypt,
+    rsa_encrypt
 )
 from datetime import datetime
 from src.infra.grpc_clients import notifier_grpc_client
 from src.utils.helper import clear_value, remove_special_character
 import json
+import uuid
 
 from src.services import program_referal_service
 
@@ -91,13 +95,16 @@ class UserService:
             self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
                 "error": "error in create referal code.", "description": str(ex)})
 
-    def validate_password(self, user: dict, password: str):
+    def validate_password(self, user: dict, data: user.ValidatePassword):
         """Validate password."""
-        password = encrypt_key(password)
+        decrypt_password = rsa_decrypt(data.key)
+        password = encrypt_key(decrypt_password)
         if password != user_repo.get_password(user.get("id")):
             self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
                 "error": "incorrect credentials"})
-        return {"detail": True}
+        result = validate_key_repo.create(
+            {"expired": False}, str(uuid.uuid4()))
+        return {"detail": result}
 
     def create_admin(self, data: user.InUserAdmin):
         """Create user."""
