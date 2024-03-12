@@ -10,7 +10,10 @@ class RateValue(BaseModel):
 
 
 class RateType(BaseModel):
-    """Base model of rate"""
+    """
+    Base model of rate
+    available types: ["PIX_CASH_OUT", "PIX_CASH_IN", "BETWEEN_ACCOUNTS"]
+    """
     type: str
     value: RateValue
 
@@ -28,6 +31,7 @@ class RateType(BaseModel):
 class InRate(BaseModel):
     """Model of input data for rate user"""
 
+    is_default: bool = False
     values: List[RateType] = None
     name: str = None
 
