@@ -17,3 +17,15 @@ async def get_all_user_invited(user_id, user=Depends(verify_is_admin)):
 async def create_referal(data: program_referal.InProgramReferal, user=Depends(verify_is_admin)):
     """Create referal object."""
     return program_referal_service.create(user, data)
+
+
+@router.get("")
+async def get_program_referal_consumer(user=Depends(verify_is_admin)):
+    """Get all referal of consumer."""
+    return program_referal_service.get_program_referal_consumer(user)
+
+@router.put("/{id}")
+async def update_referal(id: str, user=Depends(verify_is_admin)):
+    """Update referal code."""
+    return program_referal_service.update(user, id)
+    

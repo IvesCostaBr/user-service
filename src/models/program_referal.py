@@ -4,6 +4,27 @@ from src.utils.helper import generate_unique_random_string
 from src.repositorys import rate_repo
 
 
+class UpdateProgramReferal(BaseModel):
+    """Update referal code."""
+
+    name: str
+    expired_at: datetime = None
+    rate_id: str
+
+    @validator("name")
+    def validate_name(cls, value):
+        if len(value) < 5:
+            raise ValueError("length of name less 5")
+        return value
+
+    @validator("expired_at")
+    def validate_expired_at(cls, value):
+        """Validate expired at."""
+        if value <= datetime:
+            raise ValueError("input datetime <= datetime.now()")
+        return value
+
+
 class InProgramReferal(BaseModel):
     """Program referal."""
 

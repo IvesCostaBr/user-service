@@ -9,9 +9,20 @@ class ProgramReferalService:
     def __init__(self) -> None:
         self.entity = "program_referal"
 
-    def update(self, user: dict, id: str):
+    def update(self, user: dict, id: str, data: program_referal.UpdateProgramReferal):
         """Update referal code data."""
-        return []
+        try:
+            referal_code = program_referal_repo.get(id)
+            if not referal_code:
+                raise Exception("referal code not found.")
+            elif referal_code.get("consumer_id") != user.get("consumer_id"):
+                raise Exception("referal code not found")
+            program_referal_repo.update(id, **data.model_dump())
+        except Exception as ex:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": str(ex)}
+            )
 
     def __get_rate_consumer_default(self, consumer_id: str):
         """Get rate default of consumer."""
@@ -145,3 +156,11 @@ class ProgramReferalService:
             return {"valid": True, "referal_id": user_code.get('id')}
         except Exception as ex:
             return {"valid": False, "referal_id": None}
+
+    def get_program_referal_consumer(self, user: dict):
+        """Get all referal codes of user."""
+        codes = program_referal_repo.filter_query(
+            consumer_id=user.get('consumer_id'),
+            is_active=True
+        )
+        return codes
