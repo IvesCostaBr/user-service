@@ -69,7 +69,7 @@ class UserService:
 
         # create referal code
         if data.referal_id:
-            referal_id = self._get_referal_id(
+            referal_id = self.__get_referal_id(
                 user_data.get("consumer"), data.referal_id)
             if referal_id:
                 user_data["referal_id"] = referal_id
