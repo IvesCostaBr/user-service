@@ -9,6 +9,7 @@ class UpdateProgramReferal(BaseModel):
 
     name: str
     expired_at: datetime = None
+    is_active: bool = True
     rate_id: str
 
     @validator("name")

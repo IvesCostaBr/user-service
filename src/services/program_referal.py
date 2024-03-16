@@ -82,7 +82,7 @@ class ProgramReferalService:
                 rates["main"] = rate
                 rates["main"]["user_id"] = default_referal.get('user_id')
         rates["users"] = {}
-        referal = program_referal_repo.get(user.get('invitation_id'))
+        referal = program_referal_repo.get(user.get('referal_id'))
         if not referal:
             return rates
         elif referal and not referal.get('admin'):
@@ -90,7 +90,7 @@ class ProgramReferalService:
             if user_inviter:
                 rates["users"][user_inviter.get("id")] = referal.get("rate")
                 invited_referal = program_referal_repo.get(
-                    user_inviter.get('invitation_id'))
+                    user_inviter.get('referal_id'))
                 if invited_referal and not invited_referal.get('admin'):
                     invited_user = user_repo.get(
                         invited_referal.get('user_id'))
@@ -108,7 +108,7 @@ class ProgramReferalService:
         user = user_repo.get(user_id)
         if not user:
             return []
-        referal_id = user.get(user.get('referal_id'))
+        referal_id = user.get('referal_id')
 
         invites = user_repo.filter_query(
             referal_id=referal_id, get_fields=[
@@ -168,6 +168,5 @@ class ProgramReferalService:
         """Get all referal codes of user."""
         codes = program_referal_repo.filter_query(
             consumer_id=user.get('consumer_id'),
-            is_active=True
         )
         return codes

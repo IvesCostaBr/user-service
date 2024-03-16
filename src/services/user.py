@@ -68,11 +68,22 @@ class UserService:
             return {"detail": docid, "access_token": tokens.get("access_token", '')}
 
         # create referal code
-        user_data["invitation_id"] = data.referal_id
+        if data.referal_id:
+            referal_id = self._get_referal_id(
+                user_data.get("consumer"), data.referal_id)
+            if referal_id:
+                user_data["referal_id"] = referal_id
         docid = user_repo.create(user_data, docid)
         user_data["id"] = docid
         self.__create_referal_code(user_data)
         return {"detail": docid, "access_token": tokens.get("access_token", '')}
+
+    def __get_referal_id(self, consumer_id: str, code: str):
+        """Get referal code id."""
+        result = program_referals_service.validate_code(consumer_id, code)
+        if result.get("valid"):
+            return result.get("referal_id")
+        return None
 
     def __create_referal_code(self, user: dict):
         """Create referal code and rate."""
