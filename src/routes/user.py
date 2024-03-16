@@ -1,5 +1,5 @@
 from fastapi.routing import APIRouter
-from src.services import user_service, program_referal_service
+from src.services import user_service, program_referals_service
 from fastapi import Depends
 from src.models import user, auth, generic
 from src.utils.auth import authenticate_user, verify_api_key
@@ -35,7 +35,7 @@ async def refresh_token_user(refresh_token: str):
     status_code=status.HTTP_200_OK,
 )
 async def get_user_data(user: dict = Depends(authenticate_user)):
-    rates = program_referal_service.get_referals_data(user)
+    rates = program_referals_service.get_referals_data(user)
     user["rates"] = rates
     return user
 

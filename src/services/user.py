@@ -24,13 +24,13 @@ from src.utils.helper import clear_value, remove_special_character
 import json
 import uuid
 
-from src.services import program_referal_service
+from src.services import program_referals_service
 
 
 class UserService:
     def __init__(self) -> None:
         self.entity = "user"
-        self.program_referal_service = program_referal_service
+        self.program_referals_service = program_referals_service
 
     def create(self, data: user.InUser, user_admin: dict = None, consumer_id: str = None):
         """Create user."""
@@ -90,7 +90,7 @@ class UserService:
                 consumer_id=consumer_id,
                 rate_id=consumer_rate.get('id')
             )
-            self.program_referal_service.create(user, payload)
+            self.program_referals_service.create(user, payload)
         except Exception as ex:
             self.__raise_http_error(status.HTTP_400_BAD_REQUEST, {
                 "error": "error in create referal code.", "description": str(ex)})

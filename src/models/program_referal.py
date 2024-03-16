@@ -31,6 +31,7 @@ class InProgramReferal(BaseModel):
     user_id: str
     name: str = generate_unique_random_string(10)
     consumer_id: str = None
+    is_active: bool = True
     rate_id: str = None
     principal: bool = False
     expired_at: datetime = None

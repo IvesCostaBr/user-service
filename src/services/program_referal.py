@@ -7,7 +7,7 @@ from datetime import datetime
 
 class ProgramReferalService:
     def __init__(self) -> None:
-        self.entity = "program_referal"
+        self.entity = "program_referals"
 
     def update(self, user: dict, id: str, data: program_referal.UpdateProgramReferal):
         """Update referal code data."""
@@ -39,6 +39,7 @@ class ProgramReferalService:
         try:
             data = data.model_dump()
 
+            data["name"] = data.get("name").replace(" ", "").lower()
             if not user.get('is_admin'):
                 consumer = user.get("consumer")
                 data["user_id"] = user.get('id')
@@ -50,6 +51,12 @@ class ProgramReferalService:
                     "email": user.get("email")
                 }
                 data["principal"] = data.get("principal")
+            name_exists = program_referal_repo.filter_query(
+                name=data.get("name"), consumer_id=consumer
+            )
+            if name_exists:
+                raise Exception("name already registred")
+
             data["consumer_id"] = consumer
             docid = program_referal_repo.create(**data)
             return {"detail": docid, "name": data.get('name')}

@@ -1,5 +1,5 @@
 from fastapi.routing import APIRouter
-from src.services import program_referal_service
+from src.services import program_referals_service
 from fastapi import Depends
 from starlette import status
 from src.models import program_referal
@@ -11,12 +11,12 @@ router = APIRouter(tags=["Program Referal"])
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create(data: program_referal.InProgramReferal, user=Depends(authenticate_user)):
-    return program_referal_service.create(user, data)
+    return program_referals_service.create(user, data)
 
 
 @router.get("", status_code=status.HTTP_200_OK)
 async def get_referal_code_user(user=Depends(authenticate_user)):
-    return program_referal_service.get_user_referal_codes(user)
+    return program_referals_service.get_user_referal_codes(user)
 
 
 @router.get("/validate-code", status_code=status.HTTP_200_OK, responses={
@@ -28,7 +28,7 @@ async def get_referal_code_user(user=Depends(authenticate_user)):
 )
 async def validate_code(code: str, auth=Depends(verify_api_key)):
     """Validate code referal of user."""
-    return program_referal_service.validate_code(auth, code)
+    return program_referals_service.validate_code(auth, code)
 
 
 @router.get("/user/referal-codes", status_code=status.HTTP_200_OK, responses={
@@ -40,4 +40,4 @@ async def validate_code(code: str, auth=Depends(verify_api_key)):
 )
 async def get_rates_referals(auth=Depends(authenticate_user)):
     """Validate code referal of user."""
-    return program_referal_service.get_referals_data(auth)
+    return program_referals_service.get_referals_data(auth)
