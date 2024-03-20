@@ -18,6 +18,12 @@ async def register_user(data: user.InUserAdmin, user=Depends(verify_is_admin)):
     return user_service.create(data, user)
 
 
+@router.post("/{user_id}/convert-admin", status_code=status.HTTP_201_CREATED)
+async def convert_user_to_admin(user_id: str, user=Depends(verify_is_admin)):
+    """Convert user to admin."""
+    return user_service.convert_user_admin(user, user_id)
+
+
 @router.get("", status_code=status.HTTP_200_OK)
 async def get_users_admin(user=Depends(verify_is_admin)):
     return user_service.get_user_admin(user)

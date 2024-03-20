@@ -14,12 +14,21 @@ class UserRepository:
         result = self.db.create(self.entity, data, id)
         return result
 
-    def get(self, id: str):
+    def get(self, id: str, fields: list = []):
         """Get a User by id"""
         result = self.db.get(self.entity, id, False)
+        response = {}
         if result:
             result.pop("password")
-        return result
+            if fields:
+                for each in result.keys():
+                    if each in fields:
+                        response[each] = result.get(each)
+            else:
+                response = result
+        else:
+            response = None
+        return response
 
     def get_all(self):
         """Get all Users"""

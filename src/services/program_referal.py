@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from starlette import status
 from src.models import program_referal
 from datetime import datetime
+import threading
 
 
 class ProgramReferalService:
@@ -85,7 +86,7 @@ class ProgramReferalService:
         referal = program_referal_repo.get(user.get('referal_id'))
         if not referal:
             return rates
-        elif referal and not referal.get('admin'):
+        elif referal:
             user_inviter = user_repo.get(referal.get('user_id'))
             if user_inviter:
                 rates["users"][user_inviter.get("id")] = referal.get("rate")
@@ -169,4 +170,43 @@ class ProgramReferalService:
         codes = program_referal_repo.filter_query(
             consumer_id=user.get('consumer_id'),
         )
+        for each in codes:
+            each["rate"] = rate_repo.get(each.get("rate_id"))
+            each["user"] = user_repo.get(each.get("user_id"))
+            each.pop("rate_id"), each.pop("user_id")
         return codes
+
+    def bulk_update_referal_code_users(self, users: list, referal: dict):
+        for each in users:
+            user_repo.update(each.get("id"), {"referal_id": referal.get("id")})
+
+    def __delete_referal_code(self, referal_code: dict, default_code: dict):
+        """Delete referal code async."""
+
+        users_use_code = user_repo.filter_query(
+            referal_id=id, consumer=default_code.get("consumer_id"))
+        if users_use_code:
+            self.bulk_update_referal_code_users(users_use_code, default_code)
+
+        program_referal_repo.delete(referal_code.get("id"))
+
+    def delete(self, user: str, id: str):
+        """Delete referal code."""
+        try:
+            default_program_referal = program_referal_repo.filter_query(
+                consumer_id=user.get("consumer_id"), principal=True)
+            if not default_program_referal:
+                raise Exception("default code not configurated.")
+
+            delete_code = program_referal_repo.get(id)
+            if not delete_code:
+                raise Exception("referal code not found")
+
+            threading.Thread(target=self.__delete_referal_code(), args=(
+                delete_code, default_program_referal)).start()
+            return {"detail": True}
+        except Exception as ex:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": str(ex)}
+            )

@@ -29,3 +29,8 @@ async def get_program_referal_consumer(user=Depends(verify_is_admin)):
 async def update_referal(id: str, user=Depends(verify_is_admin)):
     """Update referal code."""
     return program_referals_service.update(user, id)
+
+@router.delete("/{id}")
+async def delete_referal(id: str, user=Depends(verify_is_admin)):
+    """Delete referal code."""
+    return program_referals_service.delete(user, id)

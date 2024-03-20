@@ -300,3 +300,11 @@ class UserService:
         login_token_repo.create(
             {"user_id": user_id, "token": tokens.get("access_token")})
         return {"access_token": tokens.get("access_token")}
+
+    def convert_user_admin(self, user: dict, user_id: str):
+        """Convert normal user to admin."""
+        response = False
+        user_data = user_repo.get(user_id)
+        if user_data and user_data.get("consumer") in user.get("consumers"):
+            response = user_repo.update(user_id, {"consumers": [user.get("consumer_id")], "is_admin": True})
+        return {"detail": response}
