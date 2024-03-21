@@ -96,7 +96,8 @@ def generate_tokens(user_data: dict, days_expired_at: int = None):
     if days_expired_at:
         timestamp_access = timedelta(days=days_expired_at)
     else:
-        timestamp_access = timedelta(minutes=15)
+        time = 120 if os.environ.get("ENVIRONMENT") in ["DEV", "STG"] else 15
+        timestamp_access = timedelta(minutes=time)
 
     total_seconds = (
         (datetime.utcnow() + timestamp_access) - datetime.now()
