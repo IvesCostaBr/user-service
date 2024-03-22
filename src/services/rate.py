@@ -1,5 +1,5 @@
 from starlette import status
-from src.repositorys import rate_repo
+from src.repositorys import rate_repo, program_referal_repo
 from fastapi import HTTPException
 from src.models import rate
 
@@ -75,6 +75,23 @@ class RateService:
                 raise Exception("rate not found.")
             rate_repo.update(rate_id, data)
             return {"detail": True}
+        except Exception as ex:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": str(ex)}
+            )
+
+    def delete(self, user: dict, raate_id: str):
+        """Delete rate."""
+        try:
+            rate = rate_repo.get(raate_id)
+            if not rate or rate.get("consumer_id") != user.get("consumer_id"):
+                raise Exception("error delete rate")
+            referal_code_use_rate = program_referal_repo.filter_query(
+                rate_id=rate.get('id'))
+            if referal_code_use_rate:
+                raise Exception("still have referral codes using this rate")
+            return {"detail": rate_repo.delete(raate_id)}
         except Exception as ex:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

@@ -4,6 +4,11 @@ from src.repositorys import user_repo
 from typing import List
 
 
+class PostComplete(BaseModel):
+
+    detail: bool
+
+
 class OutConsumerData(BaseModel):
     id: str
     logo: str = None

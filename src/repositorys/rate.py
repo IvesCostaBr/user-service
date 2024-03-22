@@ -42,3 +42,7 @@ class RateRepository:
         """Update document."""
         result = self.db.update(self.entity, id, kwargs)
         return result
+
+    def delete(self, id: str):
+        """Delete document."""
+        return self.db.delete(id)

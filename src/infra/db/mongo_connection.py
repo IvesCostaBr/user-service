@@ -121,3 +121,12 @@ class MongoConnection(AbstractConnection):
     def exists(self, entity: str, query: dict):
         result = self.db[entity].find(query)
         return list(result)
+
+    def delete(self, entity: str, id: str):
+        try:
+            self.db[entity].delete_one(
+                {"_id": ObjectId(id)}
+            )
+            return True
+        except:
+            return False

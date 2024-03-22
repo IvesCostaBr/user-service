@@ -8,7 +8,8 @@ from src.utils.auth import verify_is_super_user, verify_is_admin
 router = APIRouter(tags=["Admin - User"])
 
 
-@router.post("/register-super-user", status_code=status.HTTP_201_CREATED)
+@router.post("/register-super-user", responses={status.HTTP_201_CREATED: {
+    "model": user.PostComplete}}, status_code=status.HTTP_201_CREATED)
 async def register_user_admin(data: user.InUser, user=Depends(verify_is_super_user)):
     return user_service.create_admin(data)
 
@@ -18,7 +19,8 @@ async def register_user(data: user.InUserAdmin, user=Depends(verify_is_admin)):
     return user_service.create(data, user)
 
 
-@router.post("/{user_id}/convert-admin", status_code=status.HTTP_201_CREATED)
+@router.post("/{user_id}/convert-admin", responses={status.HTTP_201_CREATED: {
+    "model": user.PostComplete}}, status_code=status.HTTP_201_CREATED)
 async def convert_user_to_admin(user_id: str, user=Depends(verify_is_admin)):
     """Convert user to admin."""
     return user_service.convert_user_admin(user, user_id)

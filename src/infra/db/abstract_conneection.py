@@ -29,3 +29,7 @@ class AbstractConnection(ABC):
     @abstractmethod
     def filter_query(self, entity: str, query: dict):
         raise NotImplementedError()
+
+    @abstractmethod
+    def delete(self, entity: str, id: str):
+        raise NotImplementedError()
